@@ -1,0 +1,122 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Caiçara Mix - Novo Design Theme */
+  
+  /* Cores Base */
+  --background: #F7FAF7; /* background-light do design */
+  --foreground: #374151; /* text-dark do design */
+  
+  /* Cores Shadcn Mapeadas para o Novo Design */
+  --card: #ffffff;
+  --card-foreground: #374151;
+  
+  --popover: #ffffff;
+  --popover-foreground: #374151;
+  
+  --primary: #2F7A3E; /* Verde Principal */
+  --primary-foreground: #ffffff;
+  
+  --secondary: #A7E3B0; /* Verde Claro (light-green) usado como secundário */
+  --secondary-foreground: #151d16;
+  
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  
+  --accent: #5AA96A; /* Verde Secundário (secondary-green) */
+  --accent-foreground: #ffffff;
+  
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #2F7A3E;
+  
+  --radius: 0.75rem; /* Arredondamento maior conforme o design */
+
+  /* Sidebar Admin (Mantendo padrão escuro para contraste) */
+  --sidebar: #151d16; /* background-dark do design */
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #2F7A3E;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #2F7A3E;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #2F7A3E;
+  --sidebar-ring: #A7E3B0;
+}
+
+.dark {
+  --background: #151d16; /* background-dark */
+  --foreground: #e5e7eb;
+  
+  --card: #1f2937;
+  --card-foreground: #e5e7eb;
+  
+  --popover: #1f2937;
+  --popover-foreground: #e5e7eb;
+  
+  --primary: #5AA96A; /* Verde mais claro para dark mode */
+  --primary-foreground: #ffffff;
+  
+  --secondary: #2F7A3E;
+  --secondary-foreground: #ffffff;
+  
+  --muted: #374151;
+  --muted-foreground: #9ca3af;
+  
+  --accent: #2F7A3E;
+  --accent-foreground: #ffffff;
+  
+  --destructive: #7f1d1d;
+  --destructive-foreground: #fecaca;
+  
+  --border: #374151;
+  --input: #374151;
+  --ring: #5AA96A;
+}
+
+@theme inline {
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+  
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
