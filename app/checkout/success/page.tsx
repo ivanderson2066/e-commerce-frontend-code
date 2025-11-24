@@ -1,6 +1,4 @@
 "use client";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
@@ -11,11 +9,6 @@ import { useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 
 export default function CheckoutSuccessPage() {
-  // Se estiver no servidor, não renderiza nada
-  if (typeof window === "undefined") {
-    return null;
-  }
-
   const searchParams = useSearchParams();
   const orderParam = searchParams?.get("order");
   const [loading, setLoading] = useState(true);
@@ -33,9 +26,11 @@ export default function CheckoutSuccessPage() {
         const res = await fetch(
           `/api/mercado-pago/status?order=${encodeURIComponent(orderParam)}`
         );
+
         if (!res.ok) throw new Error("Erro ao consultar status");
 
         const data = await res.json();
+
         const remoteStatus =
           data?.paymentInfo?.status ||
           data?.merchantOrder?.status ||
@@ -44,6 +39,7 @@ export default function CheckoutSuccessPage() {
 
         setStatus(remoteStatus);
 
+        // Limpa o carrinho se o pagamento foi aprovado
         if (
           remoteStatus === "approved" ||
           remoteStatus === "paid" ||
@@ -52,7 +48,10 @@ export default function CheckoutSuccessPage() {
           try {
             clearCart();
           } catch (err) {
-            console.warn("Não foi possível limpar o carrinho localmente:", err);
+            console.warn(
+              "Não foi possível limpar o carrinho localmente:",
+              err
+            );
           }
         }
       } catch (err) {
@@ -71,6 +70,7 @@ export default function CheckoutSuccessPage() {
         <div className="mb-6 flex justify-center">
           <CheckCircle className="h-16 w-16 text-green-600" />
         </div>
+
         <h1 className="text-3xl font-serif font-medium mb-2">
           Compra Confirmada!
         </h1>
@@ -86,6 +86,7 @@ export default function CheckoutSuccessPage() {
                 ? "Pagamento confirmado. Um e-mail de confirmação foi enviado."
                 : "Pagamento pendente ou não confirmado. Você receberá um e-mail quando o pagamento for processado."}
             </p>
+
             <p className="text-sm text-muted-foreground mb-8">
               Você pode acompanhar seu pedido na página de pedidos.
             </p>
