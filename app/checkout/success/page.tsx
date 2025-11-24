@@ -1,113 +1,91 @@
 "use client";
-export const dynamic = "force-dynamic";
-export const fetchCache = "force-no-store";
 
-import Link from "next/link";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useCart } from "@/lib/cart-context";
+import Link from "next/link";
+import { CheckCircle, Package, Home, Loader2 } from "lucide-react";
 
-export default function CheckoutSuccessPage() {
+// Componente interno que usa useSearchParams
+function SuccessContent() {
   const searchParams = useSearchParams();
-  const orderParam = searchParams?.get("order");
-  const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState<string | null>(null);
-  const { clearCart } = useCart();
+  const router = useRouter();
+  const orderId = searchParams.get("order");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    async function fetchStatus() {
-      if (!orderParam) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const res = await fetch(
-          `/api/mercado-pago/status?order=${encodeURIComponent(orderParam)}`,
-          { cache: "no-store" }
-        );
-
-        if (!res.ok) throw new Error("Erro ao consultar status");
-
-        const data = await res.json();
-
-        const remoteStatus =
-          data?.paymentInfo?.status ||
-          data?.merchantOrder?.status ||
-          data?.order?.status ||
-          null;
-
-        setStatus(remoteStatus);
-
-        if (
-          remoteStatus === "approved" ||
-          remoteStatus === "paid" ||
-          remoteStatus === "authorized"
-        ) {
-          try {
-            clearCart();
-          } catch (err) {
-            console.warn("Não foi possível limpar o carrinho:", err);
-          }
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+    setMounted(true);
+    if (!orderId) {
+      // Se não tiver ID, volta pra home depois de um tempo ou mostra erro
+      // router.push("/"); 
     }
+  }, [orderId, router]);
 
-    fetchStatus();
-  }, [orderParam, clearCart]);
+  if (!mounted) return null;
+
+  if (!orderId) {
+    return (
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-red-600 mb-4">Pedido não encontrado</h1>
+        <Button asChild>
+          <Link href="/">Voltar para a Loja</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 bg-stone-50">
-      <div className="text-center max-w-md">
-        <div className="mb-6 flex justify-center">
+    <div className="text-center animate-in fade-in zoom-in duration-500">
+      <div className="flex justify-center mb-6">
+        <div className="rounded-full bg-green-100 p-6">
           <CheckCircle className="h-16 w-16 text-green-600" />
         </div>
-
-        <h1 className="text-3xl font-serif font-medium mb-2">
-          Compra Confirmada!
-        </h1>
-
-        {loading ? (
-          <p className="text-muted-foreground mb-4">
-            Aguardando confirmação de pagamento...
-          </p>
-        ) : (
-          <>
-            <p className="text-muted-foreground mb-4">
-              {status === "approved" || status === "paid"
-                ? "Pagamento confirmado. Um e-mail foi enviado."
-                : "Pagamento pendente. Você será avisado assim que for processado."}
-            </p>
-
-            <p className="text-sm text-muted-foreground mb-8">
-              Você pode acompanhar seu pedido na página de pedidos.
-            </p>
-          </>
-        )}
-
-        <div className="space-y-3">
-          <Button
-            asChild
-            className="w-full bg-stone-900 text-white hover:bg-stone-800 rounded-none"
-          >
-            <Link href="/account/orders">Ver Pedidos</Link>
-          </Button>
-
-          <Button
-            asChild
-            variant="outline"
-            className="w-full rounded-none border-black hover:bg-stone-100"
-          >
-            <Link href="/">Continuar Comprando</Link>
-          </Button>
-        </div>
       </div>
+      
+      <h1 className="text-3xl font-serif font-bold text-stone-800 mb-2">
+        Pedido Confirmado!
+      </h1>
+      <p className="text-stone-600 mb-8 text-lg">
+        Obrigado por sua compra. Seu pedido <span className="font-bold text-stone-900">#{orderId}</span> foi recebido com sucesso.
+      </p>
+
+      <div className="bg-white p-6 rounded-xl border border-stone-100 shadow-sm max-w-md mx-auto mb-8 text-left">
+        <h3 className="font-bold text-stone-800 mb-2 flex items-center gap-2">
+          <Package className="h-5 w-5 text-emerald-600" /> Próximos Passos
+        </h3>
+        <ul className="text-sm text-stone-600 space-y-2 list-disc list-inside">
+          <li>Você receberá um e-mail de confirmação.</li>
+          <li>Enviaremos o código de rastreio assim que postado.</li>
+          <li>Você pode acompanhar o status em "Meus Pedidos".</li>
+        </ul>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <Button asChild className="bg-emerald-700 hover:bg-emerald-800 text-white px-8 py-6 text-base rounded-full">
+          <Link href="/account/orders">Acompanhar Pedido</Link>
+        </Button>
+        <Button asChild variant="outline" className="border-emerald-200 text-emerald-800 hover:bg-emerald-50 px-8 py-6 text-base rounded-full">
+          <Link href="/">
+             <Home className="mr-2 h-5 w-5" /> Voltar para a Loja
+          </Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// Componente da Página Principal (com Suspense)
+export default function SuccessPage() {
+  return (
+    <div className="min-h-[80vh] flex flex-col items-center justify-center p-4 bg-stone-50">
+      <Suspense fallback={
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-emerald-600" />
+          <p className="text-stone-500">Carregando confirmação...</p>
+        </div>
+      }>
+        <SuccessContent />
+      </Suspense>
     </div>
   );
 }
