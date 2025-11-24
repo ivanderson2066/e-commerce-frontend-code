@@ -1,5 +1,6 @@
 "use client";
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,8 @@ export default function CheckoutSuccessPage() {
 
       try {
         const res = await fetch(
-          `/api/mercado-pago/status?order=${encodeURIComponent(orderParam)}`
+          `/api/mercado-pago/status?order=${encodeURIComponent(orderParam)}`,
+          { cache: "no-store" }
         );
 
         if (!res.ok) throw new Error("Erro ao consultar status");
@@ -39,7 +41,6 @@ export default function CheckoutSuccessPage() {
 
         setStatus(remoteStatus);
 
-        // Limpa o carrinho se o pagamento foi aprovado
         if (
           remoteStatus === "approved" ||
           remoteStatus === "paid" ||
@@ -48,10 +49,7 @@ export default function CheckoutSuccessPage() {
           try {
             clearCart();
           } catch (err) {
-            console.warn(
-              "Não foi possível limpar o carrinho localmente:",
-              err
-            );
+            console.warn("Não foi possível limpar o carrinho:", err);
           }
         }
       } catch (err) {
@@ -83,8 +81,8 @@ export default function CheckoutSuccessPage() {
           <>
             <p className="text-muted-foreground mb-4">
               {status === "approved" || status === "paid"
-                ? "Pagamento confirmado. Um e-mail de confirmação foi enviado."
-                : "Pagamento pendente ou não confirmado. Você receberá um e-mail quando o pagamento for processado."}
+                ? "Pagamento confirmado. Um e-mail foi enviado."
+                : "Pagamento pendente. Você será avisado assim que for processado."}
             </p>
 
             <p className="text-sm text-muted-foreground mb-8">
