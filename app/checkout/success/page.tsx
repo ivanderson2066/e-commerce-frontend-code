@@ -1,4 +1,6 @@
 "use client";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
