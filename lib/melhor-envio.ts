@@ -1,13 +1,7 @@
-// ==============================================
-//  lib/melhor-envio.ts
-// ==============================================
+// CAMINHO DO ARQUIVO: lib/melhor-envio.ts
 
-const ME_URL = process.env.MELHOR_ENVIO_URL || "https://sandbox.melhorenvio.com";
-const ME_TOKEN = process.env.MELHOR_ENVIO_TOKEN || "";
-const FROM_CEP = process.env.MELHOR_ENVIO_CEP || "";
-
-// Tipos usados pela função
 export interface ShippingItem {
+  id: string;
   width: number;
   height: number;
   length: number;
@@ -17,122 +11,136 @@ export interface ShippingItem {
 }
 
 export interface CalculateShippingParams {
-  to: string;
+  to: string; // CEP destino
   items: ShippingItem[];
 }
 
 export interface MelhorEnvioOption {
-  id: string;
+  id: number;
+  name: string;
+  price: string;
+  custom_price: string;
+  discount: string;
+  currency: string;
+  delivery_time: number;
+  delivery_range: {
+    min: number;
+    max: number;
+  };
+  custom_delivery_time: number;
+  custom_delivery_range: {
+    min: number;
+    max: number;
+  };
   company: {
+    id: number;
     name: string;
     picture: string;
   };
-  name: string;
-  custom_price: string;
-  price: string;
-  custom_delivery_time: number;
+  error?: string;
+}
+
+// Pega a URL do .env.local ou usa sandbox como fallback
+const ME_URL = process.env.MELHOR_ENVIO_URL || 'https://sandbox.melhorenvio.com.br';
+const ME_TOKEN = process.env.MELHOR_ENVIO_API_TOKEN;
+const FROM_CEP = process.env.MELHOR_ENVIO_FROM_POSTAL_CODE;
+const USER_AGENT = process.env.MELHOR_ENVIO_EMAIL || 'suporte@loja.com';
+
+export async function calculateMelhorEnvioShipping({ to, items }: CalculateShippingParams) {
+  if (!ME_TOKEN || !FROM_CEP) {
+    console.error("Melhor Envio: Token ou CEP de origem não configurados");
+    throw new Error("Configuração do Melhor Envio incompleta (Token ou CEP de origem ausente)");
+  }
+
+  // Remove barra final se existir para evitar //api
+  let baseUrl = ME_URL.endsWith('/') ? ME_URL.slice(0, -1) : ME_URL;
+  
+  // GARANTIA: Se a URL for a de produção, garante que é a correta.
+  // A API de produção geralmente responde em https://melhorenvio.com.br
+  // Mas vamos garantir que não há redirecionamentos estranhos.
+  if (baseUrl.includes('melhorenvio.com.br') && !baseUrl.includes('sandbox')) {
+      baseUrl = 'https://melhorenvio.com.br';
+  }
+
+  const endpoint = `${baseUrl}/api/v2/me/shipment/calculate`;
+  
+  // LOG DE DEBUG: Verificar ambiente
+  console.log("🚀 Ambiente Melhor Envio:", baseUrl.includes('sandbox') ? 'SANDBOX' : 'PRODUÇÃO');
+  console.log("📡 Endpoint:", endpoint);
+  console.log("📍 De:", FROM_CEP, "Para:", to);
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ME_TOKEN}`,
+        'User-Agent': `Aplicação (${USER_AGENT})` // User-Agent é obrigatório na V2
+      },
+      body: JSON.stringify({
+        from: {
+          postal_code: FROM_CEP
+        },
+        to: {
+          postal_code: to
+        },
+        products: items.map(item => ({
+          id: item.id,
+          width: item.width,
+          height: item.height,
+          length: item.length,
+          weight: item.weight,
+          insurance_value: item.insurance_value,
+          quantity: item.quantity
+        }))
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Erro API Melhor Envio (${response.status}):`, errorText);
+      
+      // Tratamento específico para erros comuns
+      if (response.status === 401) {
+        throw new Error("Token do Melhor Envio inválido ou expirado. Verifique o painel de integração.");
+      }
+      if (response.status === 405) {
+        throw new Error(`Erro de Método (405). Verifique a URL: ${endpoint}`);
+      }
+
+      try {
+          const errorJson = JSON.parse(errorText);
+          // Tenta pegar mensagens de erro aninhadas que o ME costuma mandar
+          const msg = errorJson.message || errorJson.error || (errorJson.errors ? JSON.stringify(errorJson.errors) : `Erro na API (${response.status})`);
+          throw new Error(msg);
+      } catch (e) {
+          throw new Error(`Erro na API (${response.status}): ${response.statusText}`);
+      }
+    }
+
+    const data = await response.json();
+    
+    // A API pode retornar um objeto único (erro) ou array (sucesso)
+    const options = (Array.isArray(data) ? data : [data]).filter((opt: any) => !opt.error);
+
+    return options.map((opt: MelhorEnvioOption) => ({
+      id: `me-${opt.company.name}-${opt.name}`,
+      name: `${opt.company.name} ${opt.name}`,
+      price: parseFloat(opt.custom_price),
+      daysToDeliver: opt.custom_delivery_time,
+      estimatedDate: calculateEstimatedDate(opt.custom_delivery_time),
+      companyPicture: opt.company.picture
+    }));
+
+  } catch (error) {
+    console.error("Erro interno no serviço Melhor Envio:", error);
+    throw error;
+  }
 }
 
 function calculateEstimatedDate(days: number): string {
   const date = new Date();
   date.setDate(date.getDate() + days);
-  return date.toLocaleDateString("pt-BR");
-}
-
-// ==============================================
-// Função principal
-// ==============================================
-export async function calculateMelhorEnvioShipping({
-  to,
-  items,
-}: CalculateShippingParams) {
-  if (!ME_TOKEN || !FROM_CEP) {
-    console.error("❌ Melhor Envio: Token ou CEP de origem não configurados");
-    return [];
-  }
-
-  try {
-    // Monta parâmetros para querystring
-    const params = new URLSearchParams({
-      from: FROM_CEP,
-      to,
-    });
-
-    items.forEach((item, index) => {
-      params.append(`products[${index}][width]`, String(item.width));
-      params.append(`products[${index}][height]`, String(item.height));
-      params.append(`products[${index}][length]`, String(item.length));
-      params.append(`products[${index}][weight]`, String(item.weight));
-      params.append(
-        `products[${index}][insurance_value]`,
-        String(item.insurance_value)
-      );
-      params.append(`products[${index}][quantity]`, String(item.quantity));
-    });
-
-    const url = `${ME_URL}/api/v2/me/shipment/calculate?${params.toString()}`;
-
-    // Log da URL para debug
-    console.log("📦 Melhor Envio - GET:", url);
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${ME_TOKEN}`,
-        "User-Agent": `Caiçara (${process.env.MELHOR_ENVIO_EMAIL})`,
-      },
-    });
-
-    const status = response.status;
-    const contentType = response.headers.get("content-type") || "";
-    console.log(`🚚 Melhor Envio - Status: ${status}, Content-Type: ${contentType}`);
-
-    // Lemos o raw text SEM PARSE para inspeção
-    const text = await response.text();
-
-    // Se status não OK, mostrar corpo para entender o erro
-    if (!response.ok) {
-      console.error("❌ Melhor Envio respondeu erro HTTP:", status);
-      console.error("📝 Body (raw):", text.slice(0, 4000));
-      throw new Error(`HTTP ${status}`);
-    }
-
-    // Se não for JSON, não tente parsear
-    if (!/application\/json/.test(contentType)) {
-      console.error("❌ Melhor Envio retornou conteúdo NÃO JSON");
-      console.error("📝 Body (raw):", text.slice(0, 4000));
-      throw new Error("Conteúdo não JSON — consulte os logs");
-    }
-
-    // Agora sim tenta converter para JSON
-    let data: any;
-    try {
-      data = JSON.parse(text);
-    } catch (err) {
-      console.error("❌ Falha ao fazer JSON.parse()");
-      console.error("📝 Body (raw):", text.slice(0, 4000));
-      throw err;
-    }
-
-    // Normaliza resposta
-    const options = (Array.isArray(data) ? data : [data]).filter(
-      (opt: any) => !opt.error
-    );
-
-    return options.map((opt: MelhorEnvioOption) => ({
-      id: `me-${opt.company.name}-${opt.name}`,
-      name: `${opt.company.name} ${opt.name}`,
-      price: parseFloat(opt.custom_price || opt.price),
-      daysToDeliver: opt.custom_delivery_time,
-      estimatedDate: calculateEstimatedDate(opt.custom_delivery_time),
-      companyPicture: opt.company.picture,
-    }));
-  } catch (error: any) {
-    console.error(
-      "❌ Erro Melhor Envio (detalhado):",
-      error && error.message ? error.message : error
-    );
-    return [];
-  }
+  return date.toLocaleDateString('pt-BR');
 }
