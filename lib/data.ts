@@ -1,3 +1,5 @@
+// CAMINHO DO ARQUIVO: lib/data.ts
+
 export interface Product {
   id: string;
   name: string;
@@ -7,6 +9,11 @@ export interface Product {
   category: string;
   stock: number;
   featured?: boolean;
+  // Novos campos obrigatórios para o Melhor Envio
+  weight: number; // em kg
+  width: number;  // em cm
+  height: number; // em cm
+  length: number; // em cm
 }
 
 export interface Category {
@@ -61,6 +68,10 @@ export const products: Product[] = [
     category: "cuidados-pele",
     stock: 15,
     featured: true,
+    weight: 0.2,
+    width: 10,
+    height: 10,
+    length: 15,
   },
   {
     id: "2",
@@ -74,6 +85,10 @@ export const products: Product[] = [
     category: "cabelos",
     stock: 30,
     featured: true,
+    weight: 0.15,
+    width: 8,
+    height: 5,
+    length: 8,
   },
   {
     id: "3",
@@ -87,6 +102,10 @@ export const products: Product[] = [
     category: "maquiagem",
     stock: 25,
     featured: false,
+    weight: 0.05,
+    width: 5,
+    height: 10,
+    length: 5,
   },
   {
     id: "4",
@@ -100,6 +119,10 @@ export const products: Product[] = [
     category: "corpo-banho",
     stock: 20,
     featured: true,
+    weight: 0.3,
+    width: 12,
+    height: 15,
+    length: 12,
   },
   {
     id: "5",
@@ -113,6 +136,10 @@ export const products: Product[] = [
     category: "cuidados-pele",
     stock: 18,
     featured: false,
+    weight: 0.25,
+    width: 10,
+    height: 8,
+    length: 10,
   },
   {
     id: "6",
@@ -126,6 +153,10 @@ export const products: Product[] = [
     category: "cabelos",
     stock: 22,
     featured: false,
+    weight: 0.3,
+    width: 8,
+    height: 18,
+    length: 8,
   },
   {
     id: "7",
@@ -139,6 +170,10 @@ export const products: Product[] = [
     category: "maquiagem",
     stock: 28,
     featured: true,
+    weight: 0.08,
+    width: 6,
+    height: 2,
+    length: 6,
   },
   {
     id: "8",
@@ -152,5 +187,9 @@ export const products: Product[] = [
     category: "corpo-banho",
     stock: 40,
     featured: false,
+    weight: 0.12,
+    width: 8,
+    height: 3,
+    length: 6,
   },
 ];

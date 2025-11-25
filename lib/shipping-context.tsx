@@ -1,75 +1,87 @@
+// CAMINHO DO ARQUIVO: lib/shipping-context.tsx
+
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
-import { toast } from "sonner";
+import { createContext, useContext, useState } from "react";
+import { useCart } from "@/lib/cart-context";
 
 export interface ShippingOption {
   id: string;
   name: string;
   price: number;
   daysToDeliver: number;
-  estimatedDate?: string;
-  company?: { name: string; picture: string };
+  estimatedDate: string;
+  companyPicture?: string;
 }
 
 interface ShippingContextType {
   selectedShipping: ShippingOption | null;
   shippingOptions: ShippingOption[];
-  // Atualizado para aceitar itens também
-  calculateShipping: (cep: string, items: any[]) => Promise<void>;
+  calculateShipping: (cep: string) => Promise<void>;
   selectShipping: (option: ShippingOption) => void;
   isLoading: boolean;
+  error: string | null;
 }
 
 const ShippingContext = createContext<ShippingContextType | undefined>(undefined);
 
-export function ShippingProvider({ children }: { children: ReactNode }) {
+export function ShippingProvider({ children }: { children: React.ReactNode }) {
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const { items } = useCart();
 
-  const calculateShipping = async (cep: string, items: any[]) => {
+  const calculateShipping = async (cep: string) => {
     setIsLoading(true);
+    setError(null);
     setShippingOptions([]);
     setSelectedShipping(null);
 
     try {
-      // Chama a API que criamos no Passo 1
-      const response = await fetch("/api/checkout/shipping", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cep, items }),
+      const response = await fetch('/api/shipping/calculate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cep,
+          items: items.map(item => ({
+            id: item.id,
+            quantity: item.quantity,
+            price: item.price
+          }))
+        }),
       });
 
-      if (!response.ok) throw new Error("Falha ao calcular frete");
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        // Se não for JSON (ex: 404 HTML page), lança erro específico
+        const text = await response.text();
+        console.error("Resposta não-JSON recebida:", text);
+        throw new Error("Erro de comunicação com o servidor (Rota não encontrada ou erro interno)");
+      }
 
       const data = await response.json();
 
-      // Formata os dados para exibir na tela
-      const formattedOptions: ShippingOption[] = data.map((opt: any) => {
-          const deliveryDate = new Date();
-          deliveryDate.setDate(deliveryDate.getDate() + opt.daysToDeliver);
-          
-          return {
-            id: String(opt.id),
-            name: `${opt.name}`, // Ex: SEDEX
-            price: opt.price,
-            daysToDeliver: opt.daysToDeliver,
-            estimatedDate: deliveryDate.toLocaleDateString('pt-BR')
-          };
-      });
-
-      setShippingOptions(formattedOptions);
+      if (!response.ok) {
+        const errorMessage = data.error || data.details || 'Falha ao calcular frete';
+        console.error("Erro detalhado do backend:", data);
+        throw new Error(errorMessage);
+      }
       
-      // Seleciona a opção mais barata automaticamente
-      if (formattedOptions.length > 0) {
-          const sorted = formattedOptions.sort((a, b) => a.price - b.price);
-          setSelectedShipping(sorted[0]);
+      if (Array.isArray(data) && data.length > 0) {
+        const sortedOptions = data.sort((a: ShippingOption, b: ShippingOption) => a.price - b.price);
+        setShippingOptions(sortedOptions);
+        setSelectedShipping(sortedOptions[0]);
+      } else {
+        setError("Nenhuma opção de entrega disponível para este CEP.");
       }
 
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro ao calcular frete. Tente novamente.");
+    } catch (err: any) {
+      console.error("Erro no contexto de frete:", err);
+      setError(err.message || "Erro ao conectar com serviço de frete.");
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +98,8 @@ export function ShippingProvider({ children }: { children: ReactNode }) {
         shippingOptions,
         calculateShipping,
         selectShipping,
-        isLoading
+        isLoading,
+        error
       }}
     >
       {children}

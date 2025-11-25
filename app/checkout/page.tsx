@@ -1,3 +1,5 @@
+// CAMINHO DO ARQUIVO: app/checkout/page.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,11 +8,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { useCart } from "@/lib/cart-context";
-import { useShipping } from "@/lib/shipping-context";
+import { useShipping } from "@/lib/shipping-context"; // Importa do contexto atualizado
 import { formatCardNumber, maskCEP } from "@/lib/payment-utils";
 import { ChevronLeft, AlertCircle, CheckCircle, Copy, Loader2 } from 'lucide-react';
-// Importar o componente de cartão (se formos usar transparente no futuro, mas agora é redirect)
-// import { CreditCardForm } from "@/components/checkout/credit-card-form";
 
 type CheckoutStep = "shipping" | "payment" | "confirmation";
 type PaymentMethod = "card" | "pix";
@@ -32,8 +32,15 @@ export default function CheckoutPage() {
   const { user } = useAuth();
   const { items, totalPrice, clearCart } = useCart();
   
-  // Hook de Frete (Conectado à API dos Correios)
-  const { selectedShipping, shippingOptions, calculateShipping, selectShipping, isLoading: isShippingLoading } = useShipping();
+  // Hook de Frete (Agora conectado à API via Contexto)
+  const { 
+    selectedShipping, 
+    shippingOptions, 
+    calculateShipping, 
+    selectShipping, 
+    isLoading: isShippingLoading,
+    error: shippingError 
+  } = useShipping();
   
   const [step, setStep] = useState<CheckoutStep>("shipping");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
@@ -56,6 +63,13 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showShippingOptions, setShowShippingOptions] = useState(false);
   const [pixCopied, setPixCopied] = useState(false);
+
+  // Atualiza erro local se o contexto de frete reportar erro
+  useEffect(() => {
+    if (shippingError) {
+      setError(shippingError);
+    }
+  }, [shippingError]);
 
   useEffect(() => {
     if (user) {
@@ -92,10 +106,17 @@ export default function CheckoutPage() {
   const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     let formattedValue = value;
-    if (name === "cep") formattedValue = maskCEP(value.replace(/\D/g, ""));
-    if (name === "cpf") {
-        formattedValue = value.replace(/\D/g, "").slice(0, 11); 
+    
+    if (name === "cep") {
+      // Limita e formata CEP
+      formattedValue = maskCEP(value.replace(/\D/g, "").slice(0, 8));
     }
+    
+    if (name === "cpf") {
+      // Limita CPF (formatação básica)
+      formattedValue = value.replace(/\D/g, "").slice(0, 11); 
+    }
+    
     setFormData((prev) => ({ ...prev, [name]: formattedValue }));
   };
 
@@ -107,11 +128,18 @@ export default function CheckoutPage() {
       setError("CEP inválido. Digite 8 números.");
       return;
     }
-    setError("");
     
-    // Chama a API dos Correios (via Context)
-    await calculateShipping(cleanCep, items);
-    setShowShippingOptions(true);
+    setError("");
+    setShowShippingOptions(false); // Esconde opções antigas enquanto carrega
+    
+    try {
+      // Chama a API do Melhor Envio (via Contexto -> API Route)
+      await calculateShipping(cleanCep);
+      setShowShippingOptions(true);
+    } catch (err) {
+      // O erro já é tratado no contexto, mas podemos adicionar log extra aqui se necessário
+      console.error("Erro no componente ao calcular frete", err);
+    }
   };
 
   const handleShippingSubmit = (e: React.FormEvent) => {
@@ -328,7 +356,7 @@ export default function CheckoutPage() {
                           <Button 
                             type="button" 
                             onClick={handleCalculateShipping} 
-                            disabled={isShippingLoading || formData.cep.length < 9}
+                            disabled={isShippingLoading || formData.cep.replace(/\D/g, '').length < 8}
                             variant="secondary"
                             className="min-w-[140px]"
                           >
@@ -380,6 +408,9 @@ export default function CheckoutPage() {
                                     <div>
                                         <span className="font-bold text-stone-800">{option.name}</span>
                                         <span className="text-xs text-gray-500 block">Chega em aprox. {option.daysToDeliver} dias úteis</span>
+                                        {option.companyPicture && (
+                                            <img src={option.companyPicture} alt={option.name} className="h-6 mt-1 opacity-75" />
+                                        )}
                                     </div>
                                     <span className="font-bold text-emerald-700">{option.price === 0 ? 'Grátis' : `R$ ${option.price.toFixed(2)}`}</span>
                                 </div>
