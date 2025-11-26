@@ -1,5 +1,3 @@
-"use client";
-
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import Image from "next/image";
 import { useRouter } from 'next/navigation';
@@ -53,13 +51,16 @@ export function CartSheet({ customTrigger }: CartSheetProps) {
         )}
       </SheetTrigger>
       
-      <SheetContent className="w-full sm:max-w-md flex flex-col border-l border-gray-200 shadow-2xl">
-        <SheetHeader className="border-b pb-4">
+      {/* FIX: Usamos max-w-full para respeitar o conteiner pai e evitar overflow */}
+      <SheetContent 
+        className="w-full sm:max-w-md flex flex-col border-l border-gray-200 shadow-2xl max-w-full overflow-hidden"
+      >
+        <SheetHeader className="border-b pb-4 px-6 pt-6">
           <SheetTitle className="font-serif text-2xl text-[#374151]">Seu Carrinho ({totalItems})</SheetTitle>
         </SheetHeader>
         
         {items.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center space-y-4">
+          <div className="flex-1 flex flex-col items-center justify-center space-y-4 p-6">
             <div className="h-20 w-20 bg-gray-50 rounded-full flex items-center justify-center">
                 <ShoppingBag className="h-10 w-10 text-gray-300" />
             </div>
@@ -75,8 +76,8 @@ export function CartSheet({ customTrigger }: CartSheetProps) {
           </div>
         ) : (
           <>
-            <ScrollArea className="flex-1 -mx-6 px-6 my-4">
-              <div className="space-y-6">
+            <ScrollArea className="flex-1 h-full px-6">
+              <div className="space-y-6 py-6">
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4 py-2 group">
                     <div className="relative h-24 w-24 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
@@ -88,45 +89,37 @@ export function CartSheet({ customTrigger }: CartSheetProps) {
                       />
                     </div>
                     <div className="flex-1 flex flex-col justify-between py-1">
-                      {/* Título (Sem o botão de lixeira aqui) */}
                       <div className="flex justify-between gap-2">
                         <h3 className="font-medium text-sm text-gray-900 line-clamp-2 leading-snug">{item.name}</h3>
                       </div>
                       
-                      {/* Linha de Preço e Controles */}
                       <div className="flex items-center justify-between mt-2">
                         <p className="font-bold text-sm text-[#2F7A3E]">
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
                         </p>
                         
-                        {/* Agrupamento: Controles de Qtd + Lixeira */}
-                        <div className="flex items-center gap-2">
-                            {/* Controle de Quantidade */}
-                            <div className="flex items-center gap-3 bg-gray-50 rounded-full px-2 py-1 border border-gray-200">
-                                <button
-                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                    className={`p-1 transition-colors ${
-                                    item.quantity === 1 
-                                        ? "text-red-500 hover:bg-red-100 rounded-full" 
-                                        : "hover:text-[#2F7A3E]"
-                                    }`}
-                                    title={item.quantity === 1 ? "Remover" : "Diminuir"}
-                                >
-                                    {item.quantity === 1 ? <Trash2 className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
-                                </button>
-                                
-                                <span className="text-xs font-medium w-4 text-center">{item.quantity}</span>
-                                
-                                <button
-                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                    className="p-1 hover:text-[#2F7A3E] transition-colors disabled:opacity-30"
-                                    disabled={item.quantity >= item.stock}
-                                >
-                                    <Plus className="h-3 w-3" />
-                                </button>
-                            </div>
-
-
+                        <div className="flex items-center gap-3 bg-gray-50 rounded-full px-2 py-1 border border-gray-200">
+                            <button
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                className={`p-1 transition-colors ${
+                                item.quantity === 1 
+                                    ? "text-red-500 hover:bg-red-100 rounded-full" 
+                                    : "hover:text-[#2F7A3E]"
+                                }`}
+                                title={item.quantity === 1 ? "Remover do carrinho" : "Diminuir quantidade"}
+                            >
+                                {item.quantity === 1 ? <Trash2 className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
+                            </button>
+                            
+                            <span className="text-xs font-medium w-4 text-center">{item.quantity}</span>
+                            
+                            <button
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                className="p-1 hover:text-[#2F7A3E] transition-colors disabled:opacity-30"
+                                disabled={item.quantity >= item.stock}
+                            >
+                                <Plus className="h-3 w-3" />
+                            </button>
                         </div>
                       </div>
                     </div>
@@ -135,8 +128,8 @@ export function CartSheet({ customTrigger }: CartSheetProps) {
               </div>
             </ScrollArea>
             
-            <div className="space-y-4 pt-4 border-t bg-white">
-              <div className="space-y-2">
+            <div className="p-6 border-t bg-white mt-auto">
+              <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Subtotal</span>
                   <span className="font-medium text-gray-900">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalPrice)}</span>

@@ -77,9 +77,9 @@
   --sidebar-primary: oklch(0.40 0.16 152);
   --sidebar-primary-foreground: oklch(0.98 0.01 0);
   --sidebar-accent: oklch(0.96 0.015 152);
-  --sidebar-accent-foreground: oklch(0.22 0.08 152);
+  --sidebar-accent-foreground: oklch(0.98 0.01 0.05);
   --sidebar-border: oklch(0.92 0.01 152);
-  --sidebar-ring: oklch(0.40 0.16 152);
+  --sidebar-ring: oklch(0.52 0.14 160);
 }
 
 .dark {
@@ -122,23 +122,24 @@
     @apply border-border outline-ring/50;
   }
 
-  html {
-    width: 100%;
-    overflow-x: hidden; /* Esconde scroll horizontal */
-    /* Removemos overscroll-behavior-y para permitir scroll natural no mobile */
-  }
-  
-  body {
-    @apply bg-background text-foreground;
-    width: 100%;
-    overflow-x: hidden; /* Reforço no body */
+  /* ===== FIX OFICIAL PARA IMPEDIR TELA DE DESCOLAR ===== */
+  html, body {
     margin: 0;
     padding: 0;
-    position: relative;
+    width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Corrige Sheet/Menus Radix causando overflow */
+  [data-radix-portal] {
+    max-width: 100vw;
+    overflow: hidden;
   }
 }
 
-/* Garante que imagens não estourem a largura em telas pequenas */
+/* Previne imagens e vídeos estourarem layout */
 img, video {
   max-width: 100%;
   height: auto;

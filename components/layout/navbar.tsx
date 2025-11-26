@@ -49,8 +49,8 @@ export function Navbar() {
   }
 
   return (
-    // Mantive 'relative' para não ficar fixa cobrindo o conteúdo ao rolar
-    <header className="relative z-50 flex flex-col whitespace-nowrap bg-[#F7FAF7] shadow-sm border-b border-gray-200/80">
+    // FIX: Adicionado w-full e max-w-full para garantir que não estoure
+    <header className="relative z-50 flex flex-col whitespace-nowrap bg-[#F7FAF7] shadow-sm border-b border-gray-200/80 w-full max-w-full">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8 w-full">
         
         {/* Mobile Menu Trigger + Logo */}
@@ -63,13 +63,13 @@ export function Navbar() {
           </button>
           
           <Link href="/" className="flex items-center gap-2 text-[#2F7A3E] hover:opacity-80 transition-opacity">
-            <Leaf className="h-8 w-8" />
+            <Leaf className="h-8 w-8 flex-shrink-0" />
             <h2 className="font-serif text-xl font-bold tracking-[-0.015em] text-[#374151]">Caiçara Mix</h2>
           </Link>
         </div>
 
         {/* Desktop Search Bar */}
-        <div className="hidden flex-1 px-8 lg:px-16 xl:px-24 md:block">
+        <div className="hidden flex-1 px-8 lg:px-16 xl:px-24 md:block max-w-full overflow-hidden">
            <SearchModal customTrigger={
              <div className="relative w-full cursor-pointer group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-hover:text-[#2F7A3E] transition-colors" />
@@ -83,7 +83,7 @@ export function Navbar() {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             <div className="md:hidden">
                 <SearchModal />
             </div>
@@ -121,7 +121,7 @@ export function Navbar() {
       </div>
       
       {/* Secondary Navbar (Desktop) */}
-      <div className="w-full border-t border-gray-200/80 hidden md:block bg-white/50 backdrop-blur-sm">
+      <div className="w-full border-t border-gray-200/80 hidden md:block bg-white/50 backdrop-blur-sm overflow-hidden">
         <nav className="mx-auto flex max-w-7xl items-center justify-center gap-8 px-4 py-3 sm:px-6 lg:px-8 overflow-x-auto no-scrollbar">
             <Link href="/category/todos" className="text-sm font-medium text-gray-600 transition-colors hover:text-[#2F7A3E] hover:font-bold whitespace-nowrap">
                 Todas as Categorias
@@ -145,7 +145,7 @@ export function Navbar() {
 
       {/* Mobile Menu Dropdown */}
       {isMenuOpen && (
-         <div className="lg:hidden bg-white border-t border-gray-100 p-4 flex flex-col gap-4 absolute top-full w-full shadow-lg z-50 animate-in slide-in-from-top-5 max-h-[80vh] overflow-y-auto">
+         <div className="lg:hidden bg-white border-t border-gray-100 p-4 flex flex-col gap-4 absolute top-full w-full shadow-lg z-50 animate-in slide-in-from-top-5 max-h-[80vh] overflow-y-auto left-0 right-0">
              <nav className="flex flex-col gap-3">
                 <Link href="/category/todos" className="text-base font-medium text-gray-700 py-2 border-b border-gray-50 hover:text-[#2F7A3E]" onClick={() => setIsMenuOpen(false)}>
                     Todas as Categorias

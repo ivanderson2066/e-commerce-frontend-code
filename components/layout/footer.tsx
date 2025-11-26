@@ -3,9 +3,10 @@ import { Facebook, Instagram, Twitter } from 'lucide-react'; // Lucide icons
 
 export function Footer() {
   return (
-    <footer className="bg-[#374151] text-white">
+    // FIX: Adicionado w-full e max-w-full
+    <footer className="bg-[#374151] text-white w-full max-w-full overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4">
           <div>
             <h4 className="font-serif text-lg font-bold text-white">Caiçara Mix</h4>
             <p className="mt-2 text-sm text-gray-300 leading-relaxed">
