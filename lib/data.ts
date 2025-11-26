@@ -71,7 +71,7 @@ export const products: Product[] = [
     weight: 0.2,
     width: 10,
     height: 10,
-    length: 15,
+    length: 15
   },
   {
     id: "2",
@@ -88,7 +88,7 @@ export const products: Product[] = [
     weight: 0.15,
     width: 8,
     height: 5,
-    length: 8,
+    length: 8
   },
   {
     id: "3",
@@ -105,7 +105,7 @@ export const products: Product[] = [
     weight: 0.05,
     width: 5,
     height: 10,
-    length: 5,
+    length: 5
   },
   {
     id: "4",
@@ -122,7 +122,7 @@ export const products: Product[] = [
     weight: 0.3,
     width: 12,
     height: 15,
-    length: 12,
+    length: 12
   },
   {
     id: "5",
@@ -139,7 +139,7 @@ export const products: Product[] = [
     weight: 0.25,
     width: 10,
     height: 8,
-    length: 10,
+    length: 10
   },
   {
     id: "6",
@@ -156,7 +156,7 @@ export const products: Product[] = [
     weight: 0.3,
     width: 8,
     height: 18,
-    length: 8,
+    length: 8
   },
   {
     id: "7",
@@ -173,7 +173,7 @@ export const products: Product[] = [
     weight: 0.08,
     width: 6,
     height: 2,
-    length: 6,
+    length: 6
   },
   {
     id: "8",
@@ -190,6 +190,6 @@ export const products: Product[] = [
     weight: 0.12,
     width: 8,
     height: 3,
-    length: 6,
+    length: 6
   },
 ];

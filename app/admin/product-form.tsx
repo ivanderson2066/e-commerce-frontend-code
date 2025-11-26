@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -26,16 +26,86 @@ import {
 import { ImageUpload } from "./image-upload";
 import { supabase } from "@/lib/supabase-client";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Package } from "lucide-react";
 
-// Schema de validação
+// Componente de Preço (R$)
+const MoneyInput = ({ className, value, onChange, ...props }: any) => {
+  const format = (val: number) => {
+    if (val === undefined || val === null) return "0,00";
+    return new Intl.NumberFormat("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(val);
+  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/\D/g, "");
+    const numberValue = Number(rawValue) / 100;
+    onChange(numberValue);
+  };
+  return (
+    <div className="relative">
+      <span className="absolute left-3 top-2.5 text-gray-500 font-medium">R$</span>
+      <Input {...props} inputMode="numeric" className={`pl-10 ${className}`} value={format(value)} onChange={handleChange} />
+    </div>
+  );
+};
+
+// Componente de Peso (Kg)
+const WeightInput = ({ className, value, onChange, ...props }: any) => {
+  const format = (val: number) => {
+    if (val === undefined || val === null) return "0,000";
+    return new Intl.NumberFormat("pt-BR", {
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3,
+    }).format(val);
+  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/\D/g, "");
+    const numberValue = Number(rawValue) / 1000;
+    onChange(numberValue);
+  };
+  return (
+    <div className="relative">
+      <Input {...props} inputMode="numeric" className={`pr-8 ${className}`} value={format(value)} onChange={handleChange} />
+      <span className="absolute right-3 top-2.5 text-gray-500 font-medium text-xs">kg</span>
+    </div>
+  );
+};
+
+// NOVO COMPONENTE: Input Inteiro (Sem zeros à esquerda)
+const IntegerInput = ({ className, value, onChange, ...props }: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // 1. Remove tudo que não for número
+    const rawVal = e.target.value.replace(/\D/g, "");
+    
+    // 2. Se estiver vazio, mantém vazio. Se tiver valor, converte para Number (isso remove zeros à esquerda: "05" vira 5)
+    onChange(rawVal === "" ? "" : Number(rawVal));
+  };
+
+  return (
+    <Input 
+      {...props}
+      // Usamos "text" + "numeric" para forçar o React a controlar a exibição exata da string
+      type="text" 
+      inputMode="numeric" 
+      className={className}
+      value={value} 
+      onChange={handleChange}
+    />
+  );
+};
+
 const productSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   description: z.string().min(1, "Descrição é obrigatória"),
   price: z.coerce.number().min(0.01, "Preço deve ser maior que 0"),
   stock: z.coerce.number().min(0, "Estoque não pode ser negativo"),
   category: z.string().min(1, "Categoria é obrigatória"),
-  images: z.array(z.string()).min(1, "Pelo menos uma imagem é necessária"),
+  images: z.array(z.union([z.string(), z.any()])).min(1, "Pelo menos uma imagem é necessária"),
+  weight: z.coerce.number().min(0.001, "Peso obrigatório (mín. 1g)"),
+  width: z.coerce.number().min(1, "Mínimo 1cm"),
+  height: z.coerce.number().min(1, "Mínimo 1cm"),
+  length: z.coerce.number().min(1, "Mínimo 1cm"),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -57,60 +127,91 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
       description: initialData.description,
       price: initialData.price,
       stock: initialData.stock,
-      category: initialData.category, // slug
+      category: initialData.category,
       images: initialData.images || [],
+      weight: initialData.weight || 0.3,
+      width: initialData.width || 15,
+      height: initialData.height || 5,
+      length: initialData.length || 20,
     } : {
       name: "",
       description: "",
       price: 0,
-      stock: 0,
+      stock: 0, 
       category: "",
       images: [],
+      weight: 0.300,
+      width: 15,
+      height: 5,
+      length: 20,
     },
   });
+
+  const preventInvalidChars = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (["-", "+", "e", "E"].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  const processImages = async (mixedImages: (string | File)[]): Promise<string[]> => {
+    const processedUrls: string[] = [];
+    for (const item of mixedImages) {
+      if (item instanceof File) {
+        const fileExt = item.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `${fileName}`;
+        const { error: uploadError } = await supabase.storage
+          .from('products')
+          .upload(filePath, item);
+        if (uploadError) throw new Error(`Erro ao enviar imagem ${item.name}: ${uploadError.message}`);
+        const { data } = supabase.storage.from('products').getPublicUrl(filePath);
+        processedUrls.push(data.publicUrl);
+      } else {
+        processedUrls.push(item);
+      }
+    }
+    return processedUrls;
+  };
 
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
-      
-      // Prepara objeto para salvar
+      const finalImageUrls = await processImages(data.images);
+      const selectedCategory = categories.find(c => c.slug === data.category);
+
       const productData = {
-        ...data,
-        slug: data.name.toLowerCase()
-            .replace(/[áàãâä]/g, 'a')
-            .replace(/[éèêë]/g, 'e')
-            .replace(/[íìîï]/g, 'i')
-            .replace(/[óòõôö]/g, 'o')
-            .replace(/[úùûü]/g, 'u')
-            .replace(/[ç]/g, 'c')
-            .replace(/[^a-z0-9]/g, '-')
-            .replace(/-+/g, '-') + (initialData ? '' : `-${Math.floor(Math.random() * 1000)}`), // Garante slug único na criação
-        category_id: categories.find(c => c.slug === data.category)?.id, // Relaciona com ID
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        stock: Number(data.stock), 
+        category: data.category,
+        category_id: selectedCategory?.id,
+        images: finalImageUrls,
+        featured: false,
+        weight: data.weight,
+        width: data.width,
+        height: data.height,
+        length: data.length,
+        ...(initialData ? {} : {
+            slug: data.name.toLowerCase()
+            .replace(/[áàãâä]/g, 'a').replace(/[éèêë]/g, 'e').replace(/[íìîï]/g, 'i').replace(/[óòõôö]/g, 'o').replace(/[úùûü]/g, 'u').replace(/[ç]/g, 'c')
+            .replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-') + `-${Math.floor(Math.random() * 1000)}`
+        })
       };
 
       if (initialData) {
-        // UPDATE
-        const { error } = await supabase
-          .from('products')
-          .update(productData)
-          .eq('id', initialData.id);
-
+        const { error } = await supabase.from('products').update(productData).eq('id', initialData.id);
         if (error) throw error;
-        toast.success("Produto atualizado com sucesso!");
+        toast.success("Produto atualizado!");
       } else {
-        // CREATE
-        const { error } = await supabase
-          .from('products')
-          .insert([productData]);
-
+        const { error } = await supabase.from('products').insert([productData]);
         if (error) throw error;
-        toast.success("Produto criado com sucesso!");
+        toast.success("Produto criado!");
       }
-
       onSuccess();
     } catch (error: any) {
       console.error(error);
-      toast.error("Erro ao salvar produto.", { description: error.message });
+      toast.error("Erro ao salvar.", { description: error.message });
     } finally {
       setLoading(false);
     }
@@ -121,18 +222,20 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
         <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             
-            {/* IMAGENS */}
             <FormField
             control={form.control}
             name="images"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Imagens do Produto</FormLabel>
+                <FormLabel>Imagens</FormLabel>
                 <FormControl>
                     <ImageUpload
                     value={field.value}
                     onChange={field.onChange}
-                    onRemove={(url) => field.onChange(field.value.filter((current) => current !== url))}
+                    onRemove={(itemToRemove) => {
+                        const updated = field.value.filter((i) => i !== itemToRemove);
+                        field.onChange(updated);
+                    }}
                     />
                 </FormControl>
                 <FormMessage />
@@ -148,7 +251,7 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
                     <FormItem>
                     <FormLabel>Nome do Produto</FormLabel>
                     <FormControl>
-                        <Input disabled={loading} placeholder="Ex: Sérum Facial" {...field} />
+                        <Input disabled={loading} placeholder="Ex: Creme Hidratante" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -161,15 +264,10 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
                 render={({ field }) => (
                     <FormItem>
                     <FormLabel>Categoria</FormLabel>
-                    <Select 
-                        disabled={loading} 
-                        onValueChange={field.onChange} 
-                        value={field.value} 
-                        defaultValue={field.value}
-                    >
+                    <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                         <FormControl>
                         <SelectTrigger>
-                            <SelectValue defaultValue={field.value} placeholder="Selecione uma categoria" />
+                            <SelectValue defaultValue={field.value} placeholder="Selecione..." />
                         </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -190,29 +288,97 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
                 name="price"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Preço (R$)</FormLabel>
+                    <FormLabel>Preço de Venda</FormLabel>
                     <FormControl>
-                        <Input type="number" disabled={loading} placeholder="9.99" {...field} />
+                        <MoneyInput value={field.value} onChange={field.onChange} disabled={loading} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
                 )}
                 />
 
+                {/* ESTOQUE AGORA USA IntegerInput PARA CORRIGIR O ZERO À ESQUERDA */}
                 <FormField
                 control={form.control}
                 name="stock"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Estoque (Qtd)</FormLabel>
+                    <FormLabel>Estoque</FormLabel>
                     <FormControl>
-                        <Input type="number" disabled={loading} placeholder="10" {...field} />
+                        <IntegerInput 
+                            disabled={loading} 
+                            value={field.value} 
+                            onChange={field.onChange} 
+                            placeholder="0"
+                        />
                     </FormControl>
-                    <FormDescription>Quantidade disponível para venda imediata.</FormDescription>
+                    <FormDescription>Qtd. disponível.</FormDescription>
                     <FormMessage />
                     </FormItem>
                 )}
                 />
+            </div>
+
+            <div className="rounded-lg border p-4 bg-slate-50">
+                <div className="flex items-center gap-2 mb-4">
+                    <Package className="h-5 w-5 text-emerald-600" />
+                    <h3 className="font-medium text-slate-900">Dimensões para Envio</h3>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <FormField
+                    control={form.control}
+                    name="weight"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel className="text-xs">Peso (Kg)</FormLabel>
+                        <FormControl>
+                            <WeightInput value={field.value} onChange={field.onChange} disabled={loading} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    {/* Dimensões também usam IntegerInput para consistência */}
+                    <FormField
+                    control={form.control}
+                    name="width"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel className="text-xs">Largura (cm)</FormLabel>
+                        <FormControl>
+                            <IntegerInput disabled={loading} value={field.value} onChange={field.onChange} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="height"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel className="text-xs">Altura (cm)</FormLabel>
+                        <FormControl>
+                            <IntegerInput disabled={loading} value={field.value} onChange={field.onChange} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="length"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel className="text-xs">Comp. (cm)</FormLabel>
+                        <FormControl>
+                            <IntegerInput disabled={loading} value={field.value} onChange={field.onChange} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
             </div>
 
             <FormField
@@ -222,7 +388,7 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
                 <FormItem>
                 <FormLabel>Descrição</FormLabel>
                 <FormControl>
-                    <Textarea disabled={loading} placeholder="Detalhes do produto..." {...field} />
+                    <Textarea className="min-h-[100px]" disabled={loading} placeholder="Detalhes..." {...field} />
                 </FormControl>
                 <FormMessage />
                 </FormItem>

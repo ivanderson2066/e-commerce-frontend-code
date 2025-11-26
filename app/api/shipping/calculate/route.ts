@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { calculateMelhorEnvioShipping } from '@/lib/melhor-envio';
-import { products } from '@/lib/data';
+import { getSupabaseAdmin } from '@/lib/supabase-server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,58 +11,60 @@ export async function POST(request: NextRequest) {
 
     // 1. Validação Básica
     if (!cep) {
-      return NextResponse.json(
-        { error: 'CEP de destino é obrigatório' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'CEP obrigatório' }, { status: 400 });
+    }
+    if (!items || !items.length) {
+      return NextResponse.json({ error: 'Carrinho vazio' }, { status: 400 });
     }
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json(
-        { error: 'A lista de itens é obrigatória' },
-        { status: 400 }
-      );
+    // 2. Buscar detalhes físicos dos produtos no Supabase
+    // Usamos getSupabaseAdmin para garantir acesso (bypass RLS se necessário)
+    const supabase = getSupabaseAdmin();
+    const productIds = items.map((item: any) => item.id);
+    
+    // Busca apenas as colunas necessárias para o frete
+    const { data: dbProducts, error } = await supabase
+      .from('products')
+      .select('id, weight, width, height, length, price')
+      .in('id', productIds);
+
+    if (error) {
+      console.error('Erro ao buscar produtos no DB:', error);
+      throw new Error('Falha ao recuperar dados dos produtos.');
     }
 
-    // 2. Preparação dos Dados (Hidratação)
+    // 3. Montar lista para o Melhor Envio combinando Cart + DB
     const itemsForCalculation = items.map((cartItem: any) => {
-      const product = products.find(p => p.id === cartItem.id);
-      
-      if (!product) {
-        console.warn(`Produto ID ${cartItem.id} não encontrado na base de dados mock.`);
-      }
+      // Encontra o produto correspondente vindo do banco
+      const product = dbProducts?.find((p) => p.id === cartItem.id);
 
-      // Fallback: Se o produto não for encontrado ou não tiver dados de envio, usa valores padrão seguros
+      // Se o produto não tiver dimensões cadastradas no banco, usa um padrão seguro
+      // (Isso evita que o cálculo falhe se esquecer de preencher um produto)
       return {
         id: cartItem.id,
-        width: product?.width || 10,
-        height: product?.height || 10,
-        length: product?.length || 10,
-        weight: product?.weight || 0.5, // 500g
-        insurance_value: product?.price || cartItem.price || 50, // Seguro mínimo
-        quantity: cartItem.quantity
+        width: product?.width || 15,  // Padrão do seu schema
+        height: product?.height || 5, // Padrão do seu schema
+        length: product?.length || 20,// Padrão do seu schema
+        weight: Number(product?.weight) || 0.3, // Garante número
+        insurance_value: Number(product?.price || cartItem.price || 10),
+        quantity: Number(cartItem.quantity)
       };
     });
 
-    // 3. Chamada ao Serviço Externo
+    // 4. Calcular Frete Real via Melhor Envio
     const shippingOptions = await calculateMelhorEnvioShipping({
-      to: cep.replace(/\D/g, ''), // Garante apenas números
+      to: cep.replace(/\D/g, ''), // Remove não-números
       items: itemsForCalculation
     });
 
     return NextResponse.json(shippingOptions);
 
   } catch (error: any) {
-    // Log detalhado no terminal do servidor para debug
-    console.error('❌ [API ROUTE] Erro no Cálculo de Frete:', error);
-
-    // Retorna o erro detalhado para o frontend (ajuda a entender se é token, cep, etc)
+    console.error('❌ Erro no Cálculo de Frete:', error);
     return NextResponse.json(
       { 
-        error: 'Falha ao calcular frete', 
-        details: error.message || 'Erro desconhecido no servidor',
-        // Se for um erro vindo do fetch do Melhor Envio que foi relançado
-        originalError: error.cause ? JSON.stringify(error.cause) : undefined
+        error: 'Erro ao calcular frete', 
+        details: error.message 
       },
       { status: 500 }
     );

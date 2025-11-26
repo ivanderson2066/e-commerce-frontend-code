@@ -1,8 +1,7 @@
 "use client";
 
-import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, X } from 'lucide-react';
+import { ShoppingBag, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -16,11 +15,9 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 
-// Adicionamos a interface
 interface CartSheetProps {
   customTrigger?: ReactNode;
 }
@@ -42,14 +39,12 @@ export function CartSheet({ customTrigger }: CartSheetProps) {
     <Sheet>
       <SheetTrigger asChild>
         {customTrigger ? (
-            // Se tiver trigger customizado, renderiza ele
             customTrigger
         ) : (
-            // Fallback para o botão padrão
             <Button variant="ghost" size="icon" className="relative">
             <ShoppingBag className="h-5 w-5" />
             {totalItems > 0 && (
-                <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center">
+                <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-emerald-600 text-[10px] font-bold text-white flex items-center justify-center">
                 {totalItems}
                 </span>
             )}
@@ -83,7 +78,7 @@ export function CartSheet({ customTrigger }: CartSheetProps) {
             <ScrollArea className="flex-1 -mx-6 px-6 my-4">
               <div className="space-y-6">
                 {items.map((item) => (
-                  <div key={item.id} className="flex gap-4 py-2">
+                  <div key={item.id} className="flex gap-4 py-2 group">
                     <div className="relative h-24 w-24 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
                       <Image
                         src={item.images?.[0] || "/placeholder.svg"}
@@ -93,35 +88,45 @@ export function CartSheet({ customTrigger }: CartSheetProps) {
                       />
                     </div>
                     <div className="flex-1 flex flex-col justify-between py-1">
+                      {/* Título (Sem o botão de lixeira aqui) */}
                       <div className="flex justify-between gap-2">
                         <h3 className="font-medium text-sm text-gray-900 line-clamp-2 leading-snug">{item.name}</h3>
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="text-gray-400 hover:text-red-500 transition-colors"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
                       </div>
+                      
+                      {/* Linha de Preço e Controles */}
                       <div className="flex items-center justify-between mt-2">
                         <p className="font-bold text-sm text-[#2F7A3E]">
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
                         </p>
-                        <div className="flex items-center gap-3 bg-gray-50 rounded-full px-2 py-1 border border-gray-200">
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="p-1 hover:text-[#2F7A3E] transition-colors disabled:opacity-30"
-                            disabled={item.quantity <= 1}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="text-xs font-medium w-4 text-center">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="p-1 hover:text-[#2F7A3E] transition-colors disabled:opacity-30"
-                            disabled={item.quantity >= item.stock}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </button>
+                        
+                        {/* Agrupamento: Controles de Qtd + Lixeira */}
+                        <div className="flex items-center gap-2">
+                            {/* Controle de Quantidade */}
+                            <div className="flex items-center gap-3 bg-gray-50 rounded-full px-2 py-1 border border-gray-200">
+                                <button
+                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                    className={`p-1 transition-colors ${
+                                    item.quantity === 1 
+                                        ? "text-red-500 hover:bg-red-100 rounded-full" 
+                                        : "hover:text-[#2F7A3E]"
+                                    }`}
+                                    title={item.quantity === 1 ? "Remover" : "Diminuir"}
+                                >
+                                    {item.quantity === 1 ? <Trash2 className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
+                                </button>
+                                
+                                <span className="text-xs font-medium w-4 text-center">{item.quantity}</span>
+                                
+                                <button
+                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                    className="p-1 hover:text-[#2F7A3E] transition-colors disabled:opacity-30"
+                                    disabled={item.quantity >= item.stock}
+                                >
+                                    <Plus className="h-3 w-3" />
+                                </button>
+                            </div>
+
+
                         </div>
                       </div>
                     </div>

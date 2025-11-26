@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-// Importando apenas as fontes de texto do Google
 import { Inter, Playfair_Display } from 'next/font/google';
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
@@ -10,7 +9,6 @@ import { ShippingProvider } from "@/lib/shipping-context";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
 
-// Configuração das fontes
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
@@ -35,15 +33,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${playfair.variable}`}>
-      {/* Removido o link do Material Symbols para usar Lucide */}
-      <body className="antialiased flex flex-col min-h-screen bg-[#F7FAF7]">
+      <body className="antialiased flex flex-col min-h-screen w-full bg-[#F7FAF7] overflow-x-hidden">
+        {/* CORREÇÃO: URL corrigida com https:// (duas barras) */}
         <Script src="https://sdk.mercadopago.com/js/v2" strategy="lazyOnload" />
         
         <AuthProvider>
           <CartProvider>
             <ShippingProvider>
               <Navbar />
-              <main className="flex-grow">{children}</main>
+              <main className="flex-grow w-full">
+                {children}
+              </main>
               <Footer />
               <Toaster />
             </ShippingProvider>
