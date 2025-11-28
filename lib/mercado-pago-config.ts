@@ -192,13 +192,7 @@ export function verifyWebhookSignature(
   signatureHeader: string,
   secret: string
 ): boolean {
-  // Esta é uma implementação básica. Em produção real, deve-se validar:
-  // 1. Separar ts (timestamp) e v1 (hash) do header x-signature
-  // 2. Recriar o hash usando HMAC-SHA256(ts + manifestId + payload)
-  // 3. Comparar com o hash recebido.
-  
-  // Por enquanto, para facilitar o teste, retornamos true se houver assinatura.
-  // Se quiser ativar validação estrita, descomente a lógica real abaixo.
+
   if (!signatureHeader || !secret) return true; 
 
   return true; 

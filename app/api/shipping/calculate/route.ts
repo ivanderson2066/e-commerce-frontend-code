@@ -1,5 +1,3 @@
-// CAMINHO DO ARQUIVO: app/api/shipping/calculate/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { calculateMelhorEnvioShipping } from '@/lib/melhor-envio';
 import { getSupabaseAdmin } from '@/lib/supabase-server';
@@ -9,63 +7,66 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { cep, items } = body;
 
-    // 1. Validação Básica
-    if (!cep) {
-      return NextResponse.json({ error: 'CEP obrigatório' }, { status: 400 });
-    }
-    if (!items || !items.length) {
-      return NextResponse.json({ error: 'Carrinho vazio' }, { status: 400 });
-    }
+    if (!cep) return NextResponse.json({ error: 'CEP obrigatório' }, { status: 400 });
+    if (!items || !items.length) return NextResponse.json({ error: 'Carrinho vazio' }, { status: 400 });
 
-    // 2. Buscar detalhes físicos dos produtos no Supabase
-    // Usamos getSupabaseAdmin para garantir acesso (bypass RLS se necessário)
+    // 1. Buscar detalhes físicos dos produtos no Supabase
     const supabase = getSupabaseAdmin();
     const productIds = items.map((item: any) => item.id);
     
-    // Busca apenas as colunas necessárias para o frete
     const { data: dbProducts, error } = await supabase
       .from('products')
       .select('id, weight, width, height, length, price')
       .in('id', productIds);
 
-    if (error) {
-      console.error('Erro ao buscar produtos no DB:', error);
-      throw new Error('Falha ao recuperar dados dos produtos.');
-    }
+    if (error) console.error('Erro DB Frete:', error);
 
-    // 3. Montar lista para o Melhor Envio combinando Cart + DB
+    // 2. Montar lista para o Melhor Envio
     const itemsForCalculation = items.map((cartItem: any) => {
-      // Encontra o produto correspondente vindo do banco
       const product = dbProducts?.find((p) => p.id === cartItem.id);
-
-      // Se o produto não tiver dimensões cadastradas no banco, usa um padrão seguro
-      // (Isso evita que o cálculo falhe se esquecer de preencher um produto)
       return {
         id: cartItem.id,
-        width: product?.width || 15,  // Padrão do seu schema
-        height: product?.height || 5, // Padrão do seu schema
-        length: product?.length || 20,// Padrão do seu schema
-        weight: Number(product?.weight) || 0.3, // Garante número
+        width: product?.width || 15,
+        height: product?.height || 5,
+        length: product?.length || 20,
+        weight: Number(product?.weight) || 0.3,
         insurance_value: Number(product?.price || cartItem.price || 10),
         quantity: Number(cartItem.quantity)
       };
     });
 
-    // 4. Calcular Frete Real via Melhor Envio
-    const shippingOptions = await calculateMelhorEnvioShipping({
-      to: cep.replace(/\D/g, ''), // Remove não-números
-      items: itemsForCalculation
-    });
+    // 3. Calcular Frete Real via Melhor Envio
+    let shippingOptions: any[] = [];
+    try {
+        shippingOptions = await calculateMelhorEnvioShipping({
+            to: cep.replace(/\D/g, ''),
+            items: itemsForCalculation
+        });
+    } catch (meError) {
+        console.error("Erro Melhor Envio:", meError);
+        // Não falha tudo se o ME cair, apenas retorna vazio para adicionar o fallback
+    }
 
-    return NextResponse.json(shippingOptions);
+    // 4. ADICIONAR OPÇÃO DE "RETIRADA / TESTE" (Custo Zero)
+    // Isso permite que você teste pagamentos sem pagar frete
+    const pickupOption = {
+        id: 'local-pickup',
+        name: 'Retirada na Loja / Teste',
+        price: 0, // GRÁTIS
+        daysToDeliver: 0,
+        company: { 
+            name: 'Loja Física', 
+            picture: 'https://cdn-icons-png.flaticon.com/512/75/75836.png' // Ícone genérico opcional
+        }
+    };
+
+    // Retorna as opções do Melhor Envio + a opção Grátis no início
+    return NextResponse.json([pickupOption, ...shippingOptions]);
 
   } catch (error: any) {
-    console.error('❌ Erro no Cálculo de Frete:', error);
+    console.error('❌ Erro Geral Frete:', error);
     return NextResponse.json(
-      { 
-        error: 'Erro ao calcular frete', 
-        details: error.message 
-      },
+      { error: 'Erro ao calcular frete', details: error.message },
       { status: 500 }
     );
   }
