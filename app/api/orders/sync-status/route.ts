@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-server';
 import { getPaymentStatus } from '@/lib/mercado-pago-config';
 
-// Esta rota implementa a lógica da imagem IMG-20251118-WA0086.jpg
-// Ela força uma verificação no Mercado Pago se o pedido local ainda estiver pendente.
 export async function POST(request: NextRequest) {
   try {
-    const { orderId } = await request.json();
+    // Agora aceitamos também paymentId (queryId ou collection_id) vindo do frontend
+    const { orderId, paymentId: paymentIdFromFront } = await request.json();
 
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID é obrigatório' }, { status: 400 });
@@ -15,7 +14,6 @@ export async function POST(request: NextRequest) {
     const supabaseAdmin = getSupabaseAdmin();
 
     // 1. Buscar o pedido no banco de dados
-    // Equivalente a: const reg = await Registration.findByPk(id);
     const { data: order, error } = await supabaseAdmin
       .from('orders')
       .select('*')
@@ -23,54 +21,69 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error || !order) {
+      console.error('[Sync] Pedido não encontrado:', orderId);
       return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 });
     }
 
-    // Lógica da imagem: if (reg.paymentStatus !== 'paid' && reg.mpPaymentId)
-    // Aqui usamos 'pending' ou diferente de 'paid'
-    if (order.status !== 'paid' && order.payment_id) {
-      console.log(`[Sync] Pedido ${orderId} está pendente localmente. Verificando no Mercado Pago...`);
+    // Se já estiver pago, retorna logo
+    if (order.status === 'paid' || order.status === 'approved') {
+       return NextResponse.json({ 
+          orderId: order.order_number, 
+          status: 'paid',
+          paymentId: order.payment_id
+       });
+    }
+
+    // DECISÃO INTELIGENTE:
+    // Usamos o ID que já está no banco OU o que veio do frontend (URL de retorno)
+    // Isso resolve o problema de o Webhook ainda não ter chegado.
+    const idToVerify = order.payment_id || paymentIdFromFront;
+
+    if (idToVerify) {
+      console.log(`[Sync] Verificando status no MP para pedido ${orderId} (ID Pagamento: ${idToVerify})...`);
       
       try {
-        // 2. Consultar status real no Mercado Pago
-        // Equivalente a: const payment = await getPaymentById(reg.mpPaymentId);
-        const paymentMP = await getPaymentStatus(order.payment_id);
+        const paymentMP = await getPaymentStatus(idToVerify);
 
         if (paymentMP) {
-            console.log(`[Sync] Status no Mercado Pago: ${paymentMP.status}`);
+            const mpStatus = paymentMP.status;
+            console.log(`[Sync] Status retornado pelo MP: ${mpStatus}`);
 
-            // Equivalente a: if (payment?.status === 'approved')
-            if (paymentMP.status === 'approved') {
-                // 3. Atualizar banco se estiver aprovado
-                // Equivalente a: reg.paymentStatus = 'paid'; await reg.save();
+            let newStatus = order.status;
+
+            if (mpStatus === 'approved') {
+                newStatus = 'paid';
+            } else if (mpStatus === 'cancelled' || mpStatus === 'rejected') {
+                newStatus = 'cancelled';
+            }
+
+            // Se o status mudou OU se precisamos salvar o payment_id que faltava
+            if (newStatus !== order.status || !order.payment_id) {
                 const { error: updateError } = await supabaseAdmin
                 .from('orders')
                 .update({ 
-                    status: 'paid',
+                    status: newStatus,
+                    payment_id: String(idToVerify), // Garante que salvamos o ID
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', order.id);
 
                 if (!updateError) {
-                    order.status = 'paid'; // Atualiza objeto local para retorno
-                    console.log(`[Sync] Pedido ${orderId} atualizado para PAGO com sucesso.`);
+                    console.log(`[Sync] Pedido ${orderId} atualizado para ${newStatus} com PaymentID ${idToVerify}.`);
+                    order.status = newStatus; 
+                    order.payment_id = String(idToVerify);
+                } else {
+                    console.error('[Sync] Erro ao atualizar banco:', updateError);
                 }
-            } else if (paymentMP.status === 'cancelled' || paymentMP.status === 'rejected') {
-                // Opcional: Atualizar se foi cancelado
-                await supabaseAdmin
-                .from('orders')
-                .update({ status: 'cancelled' })
-                .eq('id', order.id);
-                order.status = 'cancelled';
             }
         }
       } catch (err) {
-        console.error('[Sync] Erro ao consultar MP:', err);
-        // Não falhamos a requisição, apenas retornamos o status atual do banco
+        console.error('[Sync] Erro ao consultar API do Mercado Pago:', err);
       }
+    } else {
+        console.log(`[Sync] Pedido ${orderId} sem ID de pagamento para verificar.`);
     }
 
-    // Retorna o status (atualizado ou não)
     return NextResponse.json({ 
       orderId: order.order_number, 
       status: order.status,

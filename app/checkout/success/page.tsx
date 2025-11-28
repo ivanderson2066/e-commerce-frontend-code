@@ -1,56 +1,91 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import Link from "next/link";
-// Corrected import: useSearchParams and useRouter are now in next/navigation
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Package, Home, Loader2, Clock, XCircle } from "lucide-react";
+import { CheckCircle, Package, Home, Loader2, Clock, XCircle, RefreshCw } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   
-  // O Mercado Pago envia 'external_reference' (nosso orderId) ou nós mandamos ?order=...
+  // Captura identificadores da URL
   const orderId = searchParams.get("order") || searchParams.get("external_reference");
+  // O Mercado Pago retorna 'collection_id' ou 'payment_id'
+  const urlPaymentId = searchParams.get("payment_id") || searchParams.get("collection_id");
   
-  const [status, setStatus] = useState<string>("loading"); // loading, paid, pending, error
-  const [loadingText, setLoadingText] = useState("Verificando pagamento...");
+  const [status, setStatus] = useState<string>("loading"); 
+  const [loadingText, setLoadingText] = useState("A confirmar pagamento...");
   const { clearCart } = useCart();
+  
+  // Refs para controlar o polling
+  const pollingInterval = useRef<NodeJS.Timeout | null>(null);
+  const attempts = useRef(0);
+  const MAX_ATTEMPTS = 30; // Aumentado para 90s (30 * 3s) para dar tempo do PIX
 
   useEffect(() => {
     if (orderId) {
-      // Limpa o carrinho pois o pedido foi feito
       clearCart();
       
-      // Inicia a sincronização
-      syncStatus(orderId);
+      // Primeira verificação imediata passando o ID que veio na URL
+      checkStatus(orderId, urlPaymentId);
+
+      // Inicia Polling (verifica a cada 3 segundos)
+      pollingInterval.current = setInterval(() => {
+        checkStatus(orderId, urlPaymentId);
+      }, 3000);
     } else {
       setStatus("error");
     }
-  }, [orderId]);
 
-  const syncStatus = async (id: string) => {
+    return () => {
+      if (pollingInterval.current) clearInterval(pollingInterval.current);
+    };
+  }, [orderId, urlPaymentId]);
+
+  const checkStatus = async (oId: string, pId: string | null) => {
     try {
-      // Chama nossa rota de Backend que verifica no Mercado Pago
+      attempts.current += 1;
+      
+      // Enviamos o pId (Payment ID da URL) para o backend usar caso não tenha no banco
       const response = await fetch('/api/orders/sync-status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: id })
+        body: JSON.stringify({ 
+            orderId: oId,
+            paymentId: pId 
+        })
       });
 
       const data = await response.json();
 
       if (data.status === 'paid' || data.status === 'approved') {
         setStatus("paid");
+        setLoadingText("Pagamento confirmado!");
+        if (pollingInterval.current) clearInterval(pollingInterval.current);
+      } else if (attempts.current >= MAX_ATTEMPTS) {
+         setStatus("pending");
+         if (pollingInterval.current) clearInterval(pollingInterval.current);
       } else {
-        setStatus("pending");
+         // Se ainda não está pago, mantemos 'pending' mas continuamos tentando
+         // Só mostramos a UI de 'pending' se não estivermos no loading inicial
+         if (status !== 'loading') setStatus("pending");
       }
     } catch (error) {
-      console.error("Erro ao sincronizar:", error);
-      setStatus("pending"); // Assume pendente em caso de erro de rede
+      console.error("Erro ao verificar status:", error);
     }
+  };
+
+  const manualRefresh = () => {
+      setLoadingText("A verificar novamente...");
+      setStatus("loading");
+      attempts.current = 0; 
+      checkStatus(orderId || "", urlPaymentId);
+      
+      if (!pollingInterval.current) {
+          pollingInterval.current = setInterval(() => checkStatus(orderId || "", urlPaymentId), 3000);
+      }
   };
 
   if (!orderId || status === "error") {
@@ -65,22 +100,26 @@ function SuccessContent() {
     );
   }
 
+  if (status === "loading") {
+      return (
+        <div className="min-h-[80vh] flex flex-col items-center justify-center p-4 bg-stone-50 animate-pulse">
+            <div className="bg-white p-10 rounded-2xl shadow-sm border border-stone-100 max-w-md w-full text-center">
+                <Loader2 className="h-16 w-16 text-emerald-600 animate-spin mb-6 mx-auto" />
+                <h2 className="text-xl font-bold text-stone-800">{loadingText}</h2>
+                <p className="text-stone-500 mt-2 text-sm">A comunicar com o banco...</p>
+            </div>
+        </div>
+      );
+  }
+
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center p-4 bg-stone-50">
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-stone-100 max-w-md w-full text-center animate-in fade-in zoom-in duration-500">
         
-        {status === "loading" && (
-          <div className="flex flex-col items-center py-8">
-            <Loader2 className="h-16 w-16 text-emerald-600 animate-spin mb-4" />
-            <h2 className="text-xl font-bold text-stone-800">{loadingText}</h2>
-            <p className="text-stone-500 mt-2">Aguarde um momento...</p>
-          </div>
-        )}
-
-        {status === "paid" && (
+        {status === "paid" ? (
           <>
             <div className="flex justify-center mb-6">
-              <div className="rounded-full bg-green-100 p-6">
+              <div className="rounded-full bg-green-100 p-6 shadow-inner">
                 <CheckCircle className="h-16 w-16 text-green-600" />
               </div>
             </div>
@@ -88,41 +127,45 @@ function SuccessContent() {
               Pagamento Confirmado!
             </h1>
             <p className="text-stone-600 mb-6">
-              Obrigado por sua compra. Seu pedido <strong>#{orderId}</strong> já está sendo preparado.
+              Obrigado! O pedido <strong>#{orderId}</strong> foi processado com sucesso.
             </p>
             <div className="space-y-3">
-                <Button asChild className="w-full bg-emerald-700 hover:bg-emerald-800 text-white rounded-full h-12">
-                    <Link href="/account/orders">Ver Meus Pedidos</Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full rounded-full h-12">
-                    <Link href="/">Continuar Comprando</Link>
+                <Button asChild className="w-full bg-emerald-700 hover:bg-emerald-800 text-white rounded-full h-12 text-lg">
+                    <Link href="/account/orders">Acompanhar Pedido</Link>
                 </Button>
             </div>
           </>
-        )}
-
-        {status === "pending" && (
+        ) : (
           <>
             <div className="flex justify-center mb-6">
-              <div className="rounded-full bg-yellow-100 p-6">
-                <Clock className="h-16 w-16 text-yellow-600" />
+              <div className="rounded-full bg-amber-100 p-6 shadow-inner">
+                <Clock className="h-16 w-16 text-amber-600" />
               </div>
             </div>
             <h1 className="text-2xl font-serif font-bold text-stone-800 mb-2">
-              Pagamento em Processamento
+              Aguardando Confirmação
             </h1>
-            <p className="text-stone-600 mb-6">
-              Recebemos seu pedido <strong>#{orderId}</strong>. Estamos aguardando a confirmação do banco.
+            <p className="text-stone-600 mb-4 text-sm">
+              Identificamos o seu pedido <strong>#{orderId}</strong>, mas a confirmação do pagamento ainda não chegou.
             </p>
-            <div className="bg-yellow-50 p-4 rounded-lg text-sm text-yellow-800 mb-6 text-left">
-                <p><strong>Nota:</strong> Se você pagou via PIX, a confirmação costuma ser imediata. Se pagou via Boleto, pode levar até 2 dias úteis.</p>
+            
+            <div className="bg-amber-50 p-4 rounded-lg text-sm text-amber-900 mb-6 text-left border border-amber-200">
+                <div className="flex items-start gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin mt-0.5 shrink-0" /> 
+                    <div>
+                        <strong>A verificar automaticamente...</strong>
+                        <p className="mt-1 text-xs text-amber-800">Se já pagou o PIX, aguarde alguns segundos nesta tela.</p>
+                    </div>
+                </div>
             </div>
+
             <div className="space-y-3">
                 <Button 
-                    onClick={() => syncStatus(orderId || "")} 
-                    className="w-full bg-emerald-700 hover:bg-emerald-800 text-white rounded-full h-12"
+                    onClick={manualRefresh} 
+                    variant="secondary"
+                    className="w-full rounded-full h-12 gap-2"
                 >
-                    Atualizar Status Agora
+                    <RefreshCw className="w-4 h-4" /> Verificar Novamente
                 </Button>
                 <Button asChild variant="outline" className="w-full rounded-full h-12">
                     <Link href="/account/orders">Ver Meus Pedidos</Link>
@@ -138,7 +181,7 @@ function SuccessContent() {
 
 export default function SuccessPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Carregando...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">A carregar...</div>}>
       <SuccessContent />
     </Suspense>
   );
