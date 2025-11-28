@@ -1,44 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createPaymentPreference, createPixPayment } from '@/lib/mercado-pago-config';
+import { MercadoPagoConfig, Preference } from 'mercadopago';
+import { createPixPayment } from '@/lib/mercado-pago-config';
 import { getSupabaseAdmin } from '@/lib/supabase-server';
+
+// Inicializa cliente
+const client = new MercadoPagoConfig({ 
+  accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN || '' 
+});
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
-      items,
-      shippingPrice,
-      customerEmail,
-      customerName,
-      orderId,
-      shippingAddress,
-      userId, 
-      paymentMethod // 'pix' ou 'card'
+      items, shippingPrice, customerEmail, customerName,
+      orderId, shippingAddress, userId, paymentMethod, cpf
     } = body;
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Você precisa estar logado para finalizar a compra.' },
-        { status: 400 }
-      );
-    }
+    if (!userId) return NextResponse.json({ error: 'Login necessário.' }, { status: 400 });
 
-    // Calcular totais
-    const subtotal = items.reduce((sum: number, item: any) => {
-      const price = Number(item.price || 0);
-      const qty = Number(item.quantity || 1);
-      return sum + price * qty;
-    }, 0);
+    // 1. TRATAMENTO RIGOROSO DE DADOS (Para não bloquear o PIX)
+    // CPF deve ser apenas números
+    const cleanCpf = (cpf || shippingAddress?.cpf || '').replace(/\D/g, '');
+    
+    // Nome e Sobrenome separados (Obrigatório para MP)
+    const nameParts = (customerName || 'Cliente').trim().split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'sobrenome';
 
+    // Totais
+    const subtotal = items.reduce((sum: number, item: any) => sum + (Number(item.price)*Number(item.quantity)), 0);
     const total = subtotal + Number(shippingPrice || 0);
     const orderNumber = orderId || `ord_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    
     const supabaseAdmin = getSupabaseAdmin();
 
-    // 1. Cria o pedido no Banco como 'pending'
+    // 2. Salvar Pedido 'Pending'
     const { data: inserted, error: insertError } = await supabaseAdmin
       .from('orders')
-      .insert([
-        {
+      .insert([{
           order_number: orderNumber,
           user_id: userId,
           items: items,
@@ -47,79 +46,88 @@ export async function POST(request: NextRequest) {
           total: total,
           shipping_address: shippingAddress || {},
           payment_method: paymentMethod, 
-        },
-      ])
+          status: 'pending'
+      }])
       .select()
-      .limit(1);
+      .single();
 
-    if (insertError) {
-      console.error('Erro ao salvar pedido:', insertError);
-      return NextResponse.json({ error: insertError.message }, { status: 500 });
-    }
+    if (insertError) return NextResponse.json({ error: insertError.message }, { status: 500 });
 
-    const orderRecord = Array.isArray(inserted) ? inserted[0] : inserted;
     let responseData;
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
 
-    // 2. Decide qual API do Mercado Pago chamar
     if (paymentMethod === 'pix') {
-        // --- FLUXO PIX (QR Code direto) ---
+        // --- PIX TRANSPARENTE ---
         const pixResponse = await createPixPayment(
-            total,
-            customerEmail,
-            customerName,
-            orderNumber
-            // Se tiver CPF no shippingAddress, passar aqui: shippingAddress.cpf
+            total, customerEmail, customerName, orderNumber, cleanCpf
         );
-
-        // O ID da transação no MP
         const paymentId = String(pixResponse.id);
         
-        // Dados para o frontend exibir o QR Code
-        const qrCode = pixResponse.point_of_interaction?.transaction_data?.qr_code;
-        const qrCodeBase64 = pixResponse.point_of_interaction?.transaction_data?.qr_code_base64;
-
-        // Atualiza o pedido com o ID do pagamento
-        await supabaseAdmin
-          .from('orders')
-          .update({ payment_id: paymentId })
-          .eq('order_number', orderNumber);
+        await supabaseAdmin.from('orders').update({ payment_id: paymentId }).eq('id', inserted.id);
 
         responseData = {
             type: 'pix',
-            order: orderRecord,
+            order: inserted,
             payload: {
-                qr_code: qrCode,
-                qr_code_base64: qrCodeBase64,
-                payment_id: paymentId,
-                ticket_url: pixResponse.point_of_interaction?.transaction_data?.ticket_url
+                qr_code: pixResponse.point_of_interaction?.transaction_data?.qr_code,
+                qr_code_base64: pixResponse.point_of_interaction?.transaction_data?.qr_code_base64,
+                payment_id: paymentId
             }
         };
-
     } else {
-        // --- FLUXO CARTÃO (Checkout Pro Redirect) ---
-        const preference = await createPaymentPreference(
-            items,
-            shippingPrice,
-            customerEmail,
-            customerName,
-            orderNumber,
-            shippingAddress
-        );
+        // --- CHECKOUT PRO (Onde estava o bloqueio) ---
+        const preference = new Preference(client);
+        
+        // Configuração explícita para evitar bloqueios
+        const prefResponse = await preference.create({
+          body: {
+            items: items.map((item: any) => ({
+              id: item.id,
+              title: item.title,
+              quantity: Number(item.quantity),
+              unit_price: Number(item.price),
+              currency_id: 'BRL',
+              picture_url: item.image
+            })),
+            payer: {
+              name: firstName,   // Nome separado
+              surname: lastName, // Sobrenome separado
+              email: customerEmail,
+              identification: { 
+                  type: "CPF", 
+                  number: cleanCpf // CPF limpo
+              }
+            },
+            // Referência Externa é VITAL para o Webhook achar o pedido depois
+            external_reference: orderNumber,
+            
+            back_urls: {
+              success: `${baseUrl}/checkout/success`, // Aqui o polling vai funcionar se ele voltar
+              pending: `${baseUrl}/checkout/success`,
+              failure: `${baseUrl}/checkout/success`
+            },
+            auto_return: "approved",
+            notification_url: `${baseUrl}/api/mercado-pago/webhook`, // Webhook configurado
+            statement_descriptor: "LOJA VIRTUAL",
+            payment_methods: {
+              installments: 12,
+              default_payment_method_id: undefined, // CORREÇÃO AQUI: usar undefined em vez de null
+              excluded_payment_types: [{ id: "ticket" }] // Remove boleto se quiser focar em pix/cartão
+            }
+          }
+        });
 
         responseData = {
             type: 'preference',
-            order: orderRecord,
-            payload: preference // contem o 'init_point'
+            order: inserted,
+            payload: { id: prefResponse.id, init_point: prefResponse.init_point }
         };
     }
 
     return NextResponse.json(responseData);
 
   } catch (error: any) {
-    console.error("Erro Fatal na Rota de Pagamento:", error);
-    return NextResponse.json(
-      { error: `Erro interno: ${error.message}` },
-      { status: 500 }
-    );
+    console.error("Erro Create Preference:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
