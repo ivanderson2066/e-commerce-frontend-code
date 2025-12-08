@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation"; // Hook para saber a página atual
+import { usePathname } from "next/navigation";
 import { CartSheet } from "@/components/cart/cart-sheet";
 import { useAuth } from "@/lib/auth-context";
 import { SearchModal } from "@/components/search/search-modal";
@@ -11,7 +11,7 @@ import { Menu, User, LogOut, ShoppingBag, Search, Leaf } from 'lucide-react';
 import { supabase } from "@/lib/supabase-client";
 
 export function Navbar() {
-  const pathname = usePathname(); // Pega a rota atual
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
@@ -43,17 +43,16 @@ export function Navbar() {
     fetchCategories();
   }, []);
 
-  // LÓGICA NOVA: Se for página de login ou registro, NÃO renderiza nada.
-  if (pathname === "/login" || pathname === "/register") {
+  // LÓGICA DE OCULTAÇÃO ATUALIZADA
+  // Oculta no login, registro E em todas as rotas administrativas
+  if (pathname === "/login" || pathname === "/register" || pathname?.startsWith("/admin")) {
     return null;
   }
 
   return (
-    // FIX: Adicionado w-full e max-w-full para garantir que não estoure
     <header className="relative z-50 flex flex-col whitespace-nowrap bg-[#F7FAF7] shadow-sm border-b border-gray-200/80 w-full max-w-full">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8 w-full">
         
-        {/* Mobile Menu Trigger + Logo */}
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -68,7 +67,6 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Desktop Search Bar */}
         <div className="hidden flex-1 px-8 lg:px-16 xl:px-24 md:block max-w-full overflow-hidden">
            <SearchModal customTrigger={
              <div className="relative w-full cursor-pointer group">
@@ -82,7 +80,6 @@ export function Navbar() {
            } />
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             <div className="md:hidden">
                 <SearchModal />
@@ -120,7 +117,6 @@ export function Navbar() {
         </div>
       </div>
       
-      {/* Secondary Navbar (Desktop) */}
       <div className="w-full border-t border-gray-200/80 hidden md:block bg-white/50 backdrop-blur-sm overflow-hidden">
         <nav className="mx-auto flex max-w-7xl items-center justify-center gap-8 px-4 py-3 sm:px-6 lg:px-8 overflow-x-auto no-scrollbar">
             <Link href="/category/todos" className="text-sm font-medium text-gray-600 transition-colors hover:text-[#2F7A3E] hover:font-bold whitespace-nowrap">
@@ -143,7 +139,6 @@ export function Navbar() {
         </nav>
       </div>
 
-      {/* Mobile Menu Dropdown */}
       {isMenuOpen && (
          <div className="lg:hidden bg-white border-t border-gray-100 p-4 flex flex-col gap-4 absolute top-full w-full shadow-lg z-50 animate-in slide-in-from-top-5 max-h-[80vh] overflow-y-auto left-0 right-0">
              <nav className="flex flex-col gap-3">
