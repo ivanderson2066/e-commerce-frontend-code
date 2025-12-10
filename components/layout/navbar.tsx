@@ -7,13 +7,13 @@ import { CartSheet } from "@/components/cart/cart-sheet";
 import { useAuth } from "@/lib/auth-context";
 import { SearchModal } from "@/components/search/search-modal";
 import { useCart } from "@/lib/cart-context";
-import { Menu, User, LogOut, ShoppingBag, Search, Leaf } from 'lucide-react';
+import { Menu, User, LogOut, ShoppingBag, Search, Leaf, LayoutDashboard } from 'lucide-react';
 import { supabase } from "@/lib/supabase-client";
 
 export function Navbar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth(); // <--- Usando isAdmin do Contexto
   const { totalItems } = useCart();
   
   const [categories, setCategories] = useState<any[]>([]);
@@ -87,15 +87,17 @@ export function Navbar() {
 
             {user ? (
                 <div className="flex items-center gap-2">
-                     {user.role === 'admin' && (
-                         <Link href="/admin" className="hidden sm:flex h-10 cursor-pointer items-center justify-center rounded-full bg-[#2F7A3E]/10 px-4 text-sm font-bold text-[#2F7A3E] hover:bg-[#2F7A3E]/20 transition-colors">
-                            ADMIN
-                         </Link>
-                     )}
-                     <Link href="/account" className="hidden h-10 cursor-pointer items-center gap-2 rounded-full px-3 text-sm font-medium text-[#374151] transition-colors hover:bg-gray-200/50 sm:flex group">
-                        <User className="h-5 w-5 group-hover:text-[#2F7A3E]" />
-                        <span className="hidden lg:block group-hover:text-[#2F7A3E]">Minha Conta</span>
-                    </Link>
+                      {/* BOTAO ADMIN DESKTOP */}
+                      {isAdmin && (
+                          <Link href="/admin" className="hidden sm:flex h-10 cursor-pointer items-center justify-center gap-1 rounded-full bg-[#2F7A3E]/10 px-4 text-sm font-bold text-[#2F7A3E] hover:bg-[#2F7A3E]/20 transition-colors">
+                             <LayoutDashboard className="h-4 w-4" />
+                             ADMIN
+                          </Link>
+                      )}
+                      <Link href="/account" className="hidden h-10 cursor-pointer items-center gap-2 rounded-full px-3 text-sm font-medium text-[#374151] transition-colors hover:bg-gray-200/50 sm:flex group">
+                         <User className="h-5 w-5 group-hover:text-[#2F7A3E]" />
+                         <span className="hidden lg:block group-hover:text-[#2F7A3E]">Minha Conta</span>
+                     </Link>
                 </div>
             ) : (
                 <Link href="/login" className="hidden h-10 cursor-pointer items-center gap-2 rounded-full px-3 text-sm font-medium text-[#374151] transition-colors hover:bg-gray-200/50 sm:flex group">
@@ -160,10 +162,16 @@ export function Navbar() {
              <div className="flex flex-col gap-3 pt-2 border-t border-gray-100">
                 {user ? (
                     <>
-                        <Link href="/account" className="flex items-center gap-2 text-[#2F7A3E] font-bold py-2" onClick={() => setIsMenuOpen(false)}>
+                        {/* BOTAO ADMIN MOBILE */}
+                        {isAdmin && (
+                             <Link href="/admin" className="flex items-center gap-2 text-[#2F7A3E] font-bold py-2 bg-green-50 rounded-md px-2" onClick={() => setIsMenuOpen(false)}>
+                                <LayoutDashboard className="h-5 w-5" /> PAINEL ADMIN
+                             </Link>
+                        )}
+                        <Link href="/account" className="flex items-center gap-2 text-[#2F7A3E] font-bold py-2 px-2" onClick={() => setIsMenuOpen(false)}>
                             <User className="h-5 w-5" /> Minha Conta
                         </Link>
-                        <button onClick={() => {logout(); setIsMenuOpen(false)}} className="flex items-center gap-2 text-red-600 font-medium py-2 w-full text-left">
+                        <button onClick={() => {logout(); setIsMenuOpen(false)}} className="flex items-center gap-2 text-red-600 font-medium py-2 w-full text-left px-2">
                             <LogOut className="h-5 w-5" /> Sair
                         </button>
                     </>
