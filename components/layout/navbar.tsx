@@ -45,7 +45,8 @@ export function Navbar() {
 
   // LÓGICA DE OCULTAÇÃO ATUALIZADA
   // Oculta no login, registro E em todas as rotas administrativas
-  if (pathname === "/login" || pathname === "/register" || pathname?.startsWith("/admin")) {
+  if (pathname === "/login" || pathname === "/register" ||     pathname === "/forgot-password" ||
+    pathname === "/account/update-password" || pathname?.startsWith("/admin")) {
     return null;
   }
 
