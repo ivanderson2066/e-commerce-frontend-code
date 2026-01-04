@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import Image from "next/image";
-import { Leaf, Heart, Sprout, Award, Users, Target } from "lucide-react";
+import Link from 'next/link';
+import Image from 'next/image';
+import { Leaf, Heart, Sprout, Award, Users, Target } from 'lucide-react';
 
 export default function AboutPage() {
   return (
@@ -16,13 +16,14 @@ export default function AboutPage() {
                 Sobre Caiçara Mix
               </h1>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Somos uma marca dedicada a trazer a beleza pura da natureza brasileira para sua vida. 
-                Cada produto é cuidadosamente formulado com ingredientes naturais de origem sustentável, 
-                respeitando o meio ambiente e celebrando a biodiversidade do Brasil.
+                Somos uma marca dedicada a trazer a beleza pura da natureza brasileira para sua
+                vida. Cada produto é cuidadosamente formulado com ingredientes naturais de origem
+                sustentável, respeitando o meio ambiente e celebrando a biodiversidade do Brasil.
               </p>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Fundada com a missão de democratizar o acesso a cosméticos naturais de alta qualidade, 
-                a Caiçara Mix acredita que beleza verdadeira vem da natureza, sem comprometer os valores éticos.
+                Fundada com a missão de democratizar o acesso a cosméticos naturais de alta
+                qualidade, a Caiçara Mix acredita que beleza verdadeira vem da natureza, sem
+                comprometer os valores éticos.
               </p>
               <div className="flex gap-4 pt-4">
                 <Link
@@ -65,66 +66,60 @@ export default function AboutPage() {
             {/* Value 1 */}
             <div className="rounded-lg border border-gray-200 p-8 hover:shadow-lg transition-shadow bg-white">
               <Leaf className="h-12 w-12 text-[#2F7A3E] mb-4" />
-              <h3 className="font-serif text-xl font-bold text-[#374151] mb-3">
-                100% Natural
-              </h3>
+              <h3 className="font-serif text-xl font-bold text-[#374151] mb-3">100% Natural</h3>
               <p className="text-gray-600 leading-relaxed">
-                Todos os nossos produtos são formulados com ingredientes naturais, sem componentes químicos agressivos ou sintéticos prejudiciais à saúde.
+                Todos os nossos produtos são formulados com ingredientes naturais, sem componentes
+                químicos agressivos ou sintéticos prejudiciais à saúde.
               </p>
             </div>
 
             {/* Value 2 */}
             <div className="rounded-lg border border-gray-200 p-8 hover:shadow-lg transition-shadow bg-white">
               <Heart className="h-12 w-12 text-[#2F7A3E] mb-4" />
-              <h3 className="font-serif text-xl font-bold text-[#374151] mb-3">
-                Cruelty-Free
-              </h3>
+              <h3 className="font-serif text-xl font-bold text-[#374151] mb-3">Cruelty-Free</h3>
               <p className="text-gray-600 leading-relaxed">
-                Nunca testamos em animais. Acreditamos que beleza não deve custar a vida ou o bem-estar de nenhum ser vivo.
+                Nunca testamos em animais. Acreditamos que beleza não deve custar a vida ou o
+                bem-estar de nenhum ser vivo.
               </p>
             </div>
 
             {/* Value 3 */}
             <div className="rounded-lg border border-gray-200 p-8 hover:shadow-lg transition-shadow bg-white">
               <Sprout className="h-12 w-12 text-[#2F7A3E] mb-4" />
-              <h3 className="font-serif text-xl font-bold text-[#374151] mb-3">
-                Sustentabilidade
-              </h3>
+              <h3 className="font-serif text-xl font-bold text-[#374151] mb-3">Sustentabilidade</h3>
               <p className="text-gray-600 leading-relaxed">
-                Nossas embalagens são biodegradáveis e recicláveis. Nos comprometemos com a preservação da biodiversidade brasileira.
+                Nossas embalagens são biodegradáveis e recicláveis. Nos comprometemos com a
+                preservação da biodiversidade brasileira.
               </p>
             </div>
 
             {/* Value 4 */}
             <div className="rounded-lg border border-gray-200 p-8 hover:shadow-lg transition-shadow bg-white">
               <Award className="h-12 w-12 text-[#2F7A3E] mb-4" />
-              <h3 className="font-serif text-xl font-bold text-[#374151] mb-3">
-                Qualidade
-              </h3>
+              <h3 className="font-serif text-xl font-bold text-[#374151] mb-3">Qualidade</h3>
               <p className="text-gray-600 leading-relaxed">
-                Cada produto passa por rigorosos testes de qualidade e certificações internacionais para garantir eficácia e segurança.
+                Cada produto passa por rigorosos testes de qualidade e certificações internacionais
+                para garantir eficácia e segurança.
               </p>
             </div>
 
             {/* Value 5 */}
             <div className="rounded-lg border border-gray-200 p-8 hover:shadow-lg transition-shadow bg-white">
               <Users className="h-12 w-12 text-[#2F7A3E] mb-4" />
-              <h3 className="font-serif text-xl font-bold text-[#374151] mb-3">
-                Comunidade
-              </h3>
+              <h3 className="font-serif text-xl font-bold text-[#374151] mb-3">Comunidade</h3>
               <p className="text-gray-600 leading-relaxed">
-                Apoiamos comunidades locais e pequenos agricultores que fornecem nossas matérias-primas naturais.
+                Apoiamos comunidades locais e pequenos agricultores que fornecem nossas
+                matérias-primas naturais.
               </p>
             </div>
 
             {/* Value 6 */}
             <div className="rounded-lg border border-gray-200 p-8 hover:shadow-lg transition-shadow bg-white">
               <Target className="h-12 w-12 text-[#2F7A3E] mb-4" />
-              <h3 className="font-serif text-xl font-bold text-[#374151] mb-3">
-                Transparência
-              </h3>
+              <h3 className="font-serif text-xl font-bold text-[#374151] mb-3">Transparência</h3>
               <p className="text-gray-600 leading-relaxed">
-                Acreditamos na total transparência sobre ingredientes, processos de fabricação e origem de nossos produtos.
+                Acreditamos na total transparência sobre ingredientes, processos de fabricação e
+                origem de nossos produtos.
               </p>
             </div>
           </div>
@@ -142,27 +137,28 @@ export default function AboutPage() {
 
           <div className="max-w-3xl mx-auto space-y-6 text-gray-700 leading-relaxed">
             <p>
-              A Caiçara Mix nasceu de uma paixão profunda pela beleza natural e pela floresta tropical brasileira. 
-              Tudo começou quando nossos fundadores se encontraram em uma pequena comunidade indígena, aprendendo 
-              sobre o uso ancestral de plantas e ervas para cuidados com a pele e cabelos.
+              A Caiçara Mix nasceu de uma paixão profunda pela beleza natural e pela floresta
+              tropical brasileira. Tudo começou quando nossos fundadores se encontraram em uma
+              pequena comunidade indígena, aprendendo sobre o uso ancestral de plantas e ervas para
+              cuidados com a pele e cabelos.
             </p>
 
             <p>
-              Fascinados pela riqueza de conhecimentos tradicionais e pela biodiversidade do Brasil, decidiram criar 
-              uma marca que pudesse compartilhar esses tesouros naturais com o mundo, mantendo o respeito ao meio ambiente 
-              e às comunidades locais.
+              Fascinados pela riqueza de conhecimentos tradicionais e pela biodiversidade do Brasil,
+              decidiram criar uma marca que pudesse compartilhar esses tesouros naturais com o
+              mundo, mantendo o respeito ao meio ambiente e às comunidades locais.
             </p>
 
             <p>
-              Desde a primeira fórmula desenvolvida em um pequeno laboratório até hoje, a Caiçara Mix cresceu mantendo 
-              seus valores fundamentais: qualidade premium, ingredientes 100% naturais, cruelty-free, e um impacto positivo 
-              na sociedade e no meio ambiente.
+              Desde a primeira fórmula desenvolvida em um pequeno laboratório até hoje, a Caiçara
+              Mix cresceu mantendo seus valores fundamentais: qualidade premium, ingredientes 100%
+              naturais, cruelty-free, e um impacto positivo na sociedade e no meio ambiente.
             </p>
 
             <p>
-              Hoje, somos orgulhosos de estar presente em milhares de casas, ajudando pessoas a descobrir a verdadeira 
-              beleza que floresce da natureza. Cada compra contribui para preservar a floresta e apoiar as comunidades 
-              que cuidam da terra.
+              Hoje, somos orgulhosos de estar presente em milhares de casas, ajudando pessoas a
+              descobrir a verdadeira beleza que floresce da natureza. Cada compra contribui para
+              preservar a floresta e apoiar as comunidades que cuidam da terra.
             </p>
           </div>
         </div>

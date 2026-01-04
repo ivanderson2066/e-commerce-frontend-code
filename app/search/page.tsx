@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { ProductCard } from "@/components/ui/product-card";
-import { supabase } from "@/lib/supabase-client";
-import { Search, Filter, X, ChevronDown } from "lucide-react";
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { ProductCard } from '@/components/ui/product-card';
+import { supabase } from '@/lib/supabase-client';
+import { Search, Filter, X, ChevronDown } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -19,14 +19,14 @@ interface Product {
 
 function SearchContent() {
   const searchParams = useSearchParams();
-  const query = searchParams.get("q") || "";
+  const query = searchParams.get('q') || '';
 
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(query);
-  const [selectedCategory, setSelectedCategory] = useState<string>("todas");
-  const [sortBy, setSortBy] = useState<string>("relevancia");
+  const [selectedCategory, setSelectedCategory] = useState<string>('todas');
+  const [sortBy, setSortBy] = useState<string>('relevancia');
   const [showFilters, setShowFilters] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
 
@@ -35,13 +35,13 @@ function SearchContent() {
     async function loadData() {
       try {
         setLoading(true);
-        const { data: productsData } = await supabase.from("products").select("*");
-        const { data: categoriesData } = await supabase.from("categories").select("*");
+        const { data: productsData } = await supabase.from('products').select('*');
+        const { data: categoriesData } = await supabase.from('categories').select('*');
 
         if (productsData) setProducts(productsData);
         if (categoriesData) setCategories(categoriesData);
       } catch (error) {
-        console.error("Error loading data:", error);
+        console.error('Error loading data:', error);
       } finally {
         setLoading(false);
       }
@@ -64,16 +64,16 @@ function SearchContent() {
     }
 
     // Category filter
-    if (selectedCategory !== "todas") {
+    if (selectedCategory !== 'todas') {
       filtered = filtered.filter((p) => p.category === selectedCategory);
     }
 
     // Sort
-    if (sortBy === "menor-preco") {
+    if (sortBy === 'menor-preco') {
       filtered.sort((a, b) => a.price - b.price);
-    } else if (sortBy === "maior-preco") {
+    } else if (sortBy === 'maior-preco') {
       filtered.sort((a, b) => b.price - a.price);
-    } else if (sortBy === "mais-novo") {
+    } else if (sortBy === 'mais-novo') {
       filtered.reverse();
     }
     // default is "relevancia"
@@ -98,7 +98,7 @@ function SearchContent() {
               />
               {searchQuery && (
                 <button
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => setSearchQuery('')}
                   className="p-1 hover:bg-gray-200 rounded-full text-gray-500"
                 >
                   <X className="h-5 w-5" />
@@ -120,11 +120,7 @@ function SearchContent() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid gap-8 lg:grid-cols-4">
           {/* Filters Sidebar */}
-          <div
-            className={`lg:col-span-1 ${
-              showFilters ? "block" : "hidden lg:block"
-            } space-y-6`}
-          >
+          <div className={`lg:col-span-1 ${showFilters ? 'block' : 'hidden lg:block'} space-y-6`}>
             {/* Category Filter */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h3 className="font-bold text-[#374151] mb-4 flex items-center justify-between">
@@ -142,7 +138,7 @@ function SearchContent() {
                     type="radio"
                     name="category"
                     value="todas"
-                    checked={selectedCategory === "todas"}
+                    checked={selectedCategory === 'todas'}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     className="w-4 h-4 accent-[#2F7A3E]"
                   />
@@ -183,12 +179,12 @@ function SearchContent() {
             </div>
 
             {/* Clear Filters */}
-            {(searchQuery || selectedCategory !== "todas" || sortBy !== "relevancia") && (
+            {(searchQuery || selectedCategory !== 'todas' || sortBy !== 'relevancia') && (
               <button
                 onClick={() => {
-                  setSearchQuery("");
-                  setSelectedCategory("todas");
-                  setSortBy("relevancia");
+                  setSearchQuery('');
+                  setSelectedCategory('todas');
+                  setSortBy('relevancia');
                 }}
                 className="w-full py-2 px-4 rounded-full border border-[#2F7A3E] text-[#2F7A3E] font-medium hover:bg-[#2F7A3E]/5 transition-colors"
               >
@@ -204,12 +200,12 @@ function SearchContent() {
               <h2 className="font-serif text-2xl font-bold text-[#374151]">
                 {searchQuery
                   ? `Resultados para "${searchQuery}"`
-                  : selectedCategory === "todas"
-                    ? "Todos os Produtos"
+                  : selectedCategory === 'todas'
+                    ? 'Todos os Produtos'
                     : `Produtos: ${selectedCategory}`}
               </h2>
               <span className="text-gray-600 text-sm font-medium">
-                {filteredProducts.length} {filteredProducts.length === 1 ? "produto" : "produtos"}
+                {filteredProducts.length} {filteredProducts.length === 1 ? 'produto' : 'produtos'}
               </span>
             </div>
 

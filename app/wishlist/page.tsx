@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { Heart, ChevronLeft, Trash2, ShoppingBag } from "lucide-react";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Heart, ChevronLeft, Trash2, ShoppingBag } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface WishlistItem {
   id: string;
@@ -21,12 +21,12 @@ export default function WishlistPage() {
 
   useEffect(() => {
     setMounted(true);
-    const saved = localStorage.getItem("wishlist");
+    const saved = localStorage.getItem('wishlist');
     if (saved) {
       try {
         setWishlist(JSON.parse(saved));
       } catch (error) {
-        console.error("Error loading wishlist:", error);
+        console.error('Error loading wishlist:', error);
       }
     }
   }, []);
@@ -34,14 +34,14 @@ export default function WishlistPage() {
   const removeFromWishlist = (productId: string) => {
     const updated = wishlist.filter((item) => item.id !== productId);
     setWishlist(updated);
-    localStorage.setItem("wishlist", JSON.stringify(updated));
-    toast.success("Produto removido dos favoritos");
+    localStorage.setItem('wishlist', JSON.stringify(updated));
+    toast.success('Produto removido dos favoritos');
   };
 
   const clearWishlist = () => {
     setWishlist([]);
-    localStorage.setItem("wishlist", JSON.stringify([]));
-    toast.success("Favoritos limpos");
+    localStorage.setItem('wishlist', JSON.stringify([]));
+    toast.success('Favoritos limpos');
   };
 
   if (!mounted) {
@@ -87,7 +87,7 @@ export default function WishlistPage() {
           </Link>
           <h1 className="font-serif text-3xl font-bold text-[#374151]">Meus Favoritos</h1>
           <span className="ml-auto text-sm font-medium text-gray-600">
-            {wishlist.length} {wishlist.length === 1 ? "item" : "itens"}
+            {wishlist.length} {wishlist.length === 1 ? 'item' : 'itens'}
           </span>
         </div>
 
@@ -139,9 +139,7 @@ export default function WishlistPage() {
                     </Link>
 
                     {item.description && (
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {item.description}
-                      </p>
+                      <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
                     )}
 
                     <div className="mt-auto flex items-center justify-between">
@@ -206,7 +204,7 @@ export default function WishlistPage() {
               <button
                 onClick={() => {
                   // Here you would add all items to cart and redirect
-                  toast.success("Todos os itens foram adicionados ao carrinho!");
+                  toast.success('Todos os itens foram adicionados ao carrinho!');
                 }}
                 className="w-full bg-[#2F7A3E] hover:bg-[#266332] text-white py-3 rounded-full font-bold transition-all hover:shadow-lg"
               >

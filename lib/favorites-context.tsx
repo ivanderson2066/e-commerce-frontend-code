@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { useAuth } from "./auth-context";
-import { supabase } from "./supabase-client";
-import { toast } from "sonner";
+import { createContext, useContext, useEffect, useState } from 'react';
+import { useAuth } from './auth-context';
+import { supabase } from './supabase-client';
+import { toast } from 'sonner';
 
 interface FavoritesContextType {
   favorites: string[];
@@ -14,9 +14,7 @@ interface FavoritesContextType {
   loading: boolean;
 }
 
-const FavoritesContext = createContext<FavoritesContextType | undefined>(
-  undefined
-);
+const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -29,12 +27,12 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       loadFavorites();
     } else {
       // Para usuários não logados, carregar do localStorage
-      const saved = localStorage.getItem("favorites");
+      const saved = localStorage.getItem('favorites');
       if (saved) {
         try {
           setFavorites(JSON.parse(saved));
         } catch (error) {
-          console.error("Error loading favorites from localStorage:", error);
+          console.error('Error loading favorites from localStorage:', error);
         }
       }
     }
@@ -43,7 +41,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   // Salvar em localStorage quando mudar (para usuários não logados)
   useEffect(() => {
     if (!user?.id) {
-      localStorage.setItem("favorites", JSON.stringify(favorites));
+      localStorage.setItem('favorites', JSON.stringify(favorites));
     }
   }, [favorites, user?.id]);
 
@@ -53,16 +51,16 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from("favorites")
-        .select("product_id")
-        .eq("user_id", user.id);
+        .from('favorites')
+        .select('product_id')
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
       const favoriteIds = data?.map((fav) => fav.product_id) || [];
       setFavorites(favoriteIds);
     } catch (error) {
-      console.error("Error loading favorites:", error);
+      console.error('Error loading favorites:', error);
     } finally {
       setLoading(false);
     }
@@ -72,7 +70,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     return favorites.includes(productId);
   };
 
-  const addFavorite = async (productId: string, productName: string = "") => {
+  const addFavorite = async (productId: string, productName: string = '') => {
     if (!user?.id) {
       // Para usuários não logados, apenas add ao localStorage
       if (!favorites.includes(productId)) {
@@ -82,7 +80,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const { error } = await supabase.from("favorites").insert([
+      const { error } = await supabase.from('favorites').insert([
         {
           user_id: user.id,
           product_id: productId,
@@ -90,7 +88,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       ]);
 
       if (error) {
-        if (error.code === "23505") {
+        if (error.code === '23505') {
           // Favorite already exists
           return;
         }
@@ -100,10 +98,10 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       if (!favorites.includes(productId)) {
         setFavorites([...favorites, productId]);
       }
-      toast.success(`${productName || "Produto"} adicionado aos favoritos!`);
+      toast.success(`${productName || 'Produto'} adicionado aos favoritos!`);
     } catch (error) {
-      console.error("Error adding favorite:", error);
-      toast.error("Erro ao adicionar favorito");
+      console.error('Error adding favorite:', error);
+      toast.error('Erro ao adicionar favorito');
     }
   };
 
@@ -116,25 +114,22 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const { error } = await supabase
-        .from("favorites")
+        .from('favorites')
         .delete()
-        .eq("user_id", user.id)
-        .eq("product_id", productId);
+        .eq('user_id', user.id)
+        .eq('product_id', productId);
 
       if (error) throw error;
 
       setFavorites(favorites.filter((id) => id !== productId));
-      toast.success("Removido dos favoritos!");
+      toast.success('Removido dos favoritos!');
     } catch (error) {
-      console.error("Error removing favorite:", error);
-      toast.error("Erro ao remover favorito");
+      console.error('Error removing favorite:', error);
+      toast.error('Erro ao remover favorito');
     }
   };
 
-  const toggleFavorite = async (
-    productId: string,
-    productName: string = ""
-  ) => {
+  const toggleFavorite = async (productId: string, productName: string = '') => {
     if (isFavorite(productId)) {
       await removeFavorite(productId);
     } else {
@@ -161,7 +156,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 export function useFavorites() {
   const context = useContext(FavoritesContext);
   if (context === undefined) {
-    throw new Error("useFavorites must be used within FavoritesProvider");
+    throw new Error('useFavorites must be used within FavoritesProvider');
   }
   return context;
 }

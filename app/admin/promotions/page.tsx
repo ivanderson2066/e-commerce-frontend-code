@@ -1,19 +1,12 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase-client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Trash2,
-  Plus,
-  Loader2,
-  Edit2,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase-client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Trash2, Plus, Loader2, Edit2, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface Promotion {
   id: string;
@@ -34,14 +27,14 @@ export default function PromotionsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
+    name: '',
+    description: '',
     discount_percentage: 0,
     discount_amount: 0,
-    image: "",
+    image: '',
     active: true,
-    start_date: "",
-    end_date: "",
+    start_date: '',
+    end_date: '',
   });
 
   // Load promotions
@@ -49,16 +42,16 @@ export default function PromotionsPage() {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from("promotions")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .from('promotions')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       setPromotions(data || []);
     } catch (error) {
-      console.error("Error loading promotions:", error);
-      toast.error("Erro ao carregar promoções");
+      console.error('Error loading promotions:', error);
+      toast.error('Erro ao carregar promoções');
     } finally {
       setLoading(false);
     }
@@ -72,61 +65,58 @@ export default function PromotionsPage() {
     e.preventDefault();
 
     if (!formData.name || (!formData.discount_percentage && !formData.discount_amount)) {
-      toast.error("Preencha os campos obrigatórios");
+      toast.error('Preencha os campos obrigatórios');
       return;
     }
 
     try {
       if (editingId) {
         // Update
-        const { error } = await supabase
-          .from("promotions")
-          .update(formData)
-          .eq("id", editingId);
+        const { error } = await supabase.from('promotions').update(formData).eq('id', editingId);
 
         if (error) throw error;
-        toast.success("Promoção atualizada!");
+        toast.success('Promoção atualizada!');
       } else {
         // Create
-        const { error } = await supabase.from("promotions").insert([formData]);
+        const { error } = await supabase.from('promotions').insert([formData]);
 
         if (error) throw error;
-        toast.success("Promoção criada!");
+        toast.success('Promoção criada!');
       }
 
       setIsFormOpen(false);
       setEditingId(null);
       setFormData({
-        name: "",
-        description: "",
+        name: '',
+        description: '',
         discount_percentage: 0,
         discount_amount: 0,
-        image: "",
+        image: '',
         active: true,
-        start_date: "",
-        end_date: "",
+        start_date: '',
+        end_date: '',
       });
 
       loadPromotions();
     } catch (error) {
-      console.error("Error saving promotion:", error);
-      toast.error("Erro ao salvar promoção");
+      console.error('Error saving promotion:', error);
+      toast.error('Erro ao salvar promoção');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja deletar esta promoção?")) return;
+    if (!confirm('Tem certeza que deseja deletar esta promoção?')) return;
 
     try {
-      const { error } = await supabase.from("promotions").delete().eq("id", id);
+      const { error } = await supabase.from('promotions').delete().eq('id', id);
 
       if (error) throw error;
 
-      toast.success("Promoção deletada!");
+      toast.success('Promoção deletada!');
       loadPromotions();
     } catch (error) {
-      console.error("Error deleting promotion:", error);
-      toast.error("Erro ao deletar promoção");
+      console.error('Error deleting promotion:', error);
+      toast.error('Erro ao deletar promoção');
     }
   };
 
@@ -148,17 +138,17 @@ export default function PromotionsPage() {
   const toggleActive = async (id: string, currentActive: boolean) => {
     try {
       const { error } = await supabase
-        .from("promotions")
+        .from('promotions')
         .update({ active: !currentActive })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
 
-      toast.success(currentActive ? "Promoção desativada" : "Promoção ativada");
+      toast.success(currentActive ? 'Promoção desativada' : 'Promoção ativada');
       loadPromotions();
     } catch (error) {
-      console.error("Error toggling promotion:", error);
-      toast.error("Erro ao atualizar promoção");
+      console.error('Error toggling promotion:', error);
+      toast.error('Erro ao atualizar promoção');
     }
   };
 
@@ -167,25 +157,21 @@ export default function PromotionsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-[#374151]">
-            Gerenciar Promoções
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Crie e gerencie as promoções que aparecem na home
-          </p>
+          <h1 className="font-serif text-3xl font-bold text-[#374151]">Gerenciar Promoções</h1>
+          <p className="text-gray-600 mt-1">Crie e gerencie as promoções que aparecem na home</p>
         </div>
         <Button
           onClick={() => {
             setEditingId(null);
             setFormData({
-              name: "",
-              description: "",
+              name: '',
+              description: '',
               discount_percentage: 0,
               discount_amount: 0,
-              image: "",
+              image: '',
               active: true,
-              start_date: "",
-              end_date: "",
+              start_date: '',
+              end_date: '',
             });
             setIsFormOpen(true);
           }}
@@ -200,21 +186,17 @@ export default function PromotionsPage() {
       {isFormOpen && (
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h2 className="font-bold text-xl text-[#374151] mb-4">
-            {editingId ? "Editar Promoção" : "Nova Promoção"}
+            {editingId ? 'Editar Promoção' : 'Nova Promoção'}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-[#374151] mb-2">
-                  Nome *
-                </label>
+                <label className="block text-sm font-medium text-[#374151] mb-2">Nome *</label>
                 <Input
                   type="text"
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Ex: Promoção PIX"
                   className="border-gray-300 focus:border-[#2F7A3E]"
                 />
@@ -261,29 +243,21 @@ export default function PromotionsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#374151] mb-2">
-                  Data Início
-                </label>
+                <label className="block text-sm font-medium text-[#374151] mb-2">Data Início</label>
                 <Input
                   type="datetime-local"
                   value={formData.start_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, start_date: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                   className="border-gray-300 focus:border-[#2F7A3E]"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#374151] mb-2">
-                  Data Fim
-                </label>
+                <label className="block text-sm font-medium text-[#374151] mb-2">Data Fim</label>
                 <Input
                   type="datetime-local"
                   value={formData.end_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, end_date: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
                   className="border-gray-300 focus:border-[#2F7A3E]"
                 />
               </div>
@@ -295,9 +269,7 @@ export default function PromotionsPage() {
                 <Input
                   type="url"
                   value={formData.image}
-                  onChange={(e) =>
-                    setFormData({ ...formData, image: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                   placeholder="https://..."
                   className="border-gray-300 focus:border-[#2F7A3E]"
                 />
@@ -305,14 +277,10 @@ export default function PromotionsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#374151] mb-2">
-                Descrição
-              </label>
+              <label className="block text-sm font-medium text-[#374151] mb-2">Descrição</label>
               <textarea
                 value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Descrição da promoção"
                 rows={3}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#2F7A3E] focus:ring-1 focus:ring-[#2F7A3E]"
@@ -324,29 +292,18 @@ export default function PromotionsPage() {
                 <input
                   type="checkbox"
                   checked={formData.active}
-                  onChange={(e) =>
-                    setFormData({ ...formData, active: e.target.checked })
-                  }
+                  onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
                   className="w-4 h-4 rounded border-gray-300 text-[#2F7A3E]"
                 />
-                <span className="text-sm font-medium text-[#374151]">
-                  Ativa
-                </span>
+                <span className="text-sm font-medium text-[#374151]">Ativa</span>
               </label>
             </div>
 
             <div className="flex gap-3">
-              <Button
-                type="submit"
-                className="bg-[#2F7A3E] hover:bg-[#266332] text-white"
-              >
-                {editingId ? "Atualizar" : "Criar"}
+              <Button type="submit" className="bg-[#2F7A3E] hover:bg-[#266332] text-white">
+                {editingId ? 'Atualizar' : 'Criar'}
               </Button>
-              <Button
-                type="button"
-                onClick={() => setIsFormOpen(false)}
-                variant="outline"
-              >
+              <Button type="button" onClick={() => setIsFormOpen(false)} variant="outline">
                 Cancelar
               </Button>
             </div>
@@ -370,9 +327,7 @@ export default function PromotionsPage() {
             <table className="w-full">
               <thead className="bg-[#2F7A3E]/5 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-[#374151]">
-                    Nome
-                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-[#374151]">Nome</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-[#374151]">
                     Desconto
                   </th>
@@ -392,12 +347,8 @@ export default function PromotionsPage() {
                   <tr key={promo.id} className="hover:bg-[#F7FAF7] transition-colors">
                     <td className="px-6 py-4">
                       <div>
-                        <p className="font-medium text-[#374151]">
-                          {promo.name}
-                        </p>
-                        <p className="text-sm text-gray-600 line-clamp-1">
-                          {promo.description}
-                        </p>
+                        <p className="font-medium text-[#374151]">{promo.name}</p>
+                        <p className="text-sm text-gray-600 line-clamp-1">{promo.description}</p>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-[#374151]">
@@ -406,8 +357,9 @@ export default function PromotionsPage() {
                           {promo.discount_percentage}%
                         </span>
                       )}
-                      {promo.discount_percentage > 0 &&
-                        promo.discount_amount > 0 && <span> + </span>}
+                      {promo.discount_percentage > 0 && promo.discount_amount > 0 && (
+                        <span> + </span>
+                      )}
                       {promo.discount_amount > 0 && (
                         <span className="font-semibold text-[#2F7A3E]">
                           R$ {promo.discount_amount.toFixed(2)}
@@ -419,8 +371,8 @@ export default function PromotionsPage() {
                         onClick={() => toggleActive(promo.id, promo.active)}
                         className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                           promo.active
-                            ? "bg-green-100 text-green-700 hover:bg-green-200"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
                         {promo.active ? (
@@ -438,8 +390,8 @@ export default function PromotionsPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {promo.end_date
-                        ? new Date(promo.end_date).toLocaleDateString("pt-BR")
-                        : "Sem data"}
+                        ? new Date(promo.end_date).toLocaleDateString('pt-BR')
+                        : 'Sem data'}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -471,8 +423,8 @@ export default function PromotionsPage() {
       <div className="bg-[#2F7A3E]/5 border border-[#2F7A3E]/20 rounded-lg p-4">
         <h3 className="font-semibold text-[#2F7A3E] mb-2">💡 Dica:</h3>
         <p className="text-sm text-gray-700">
-          As promoções ativas aparecem na seção de destaque da home. Você pode
-          usar tanto desconto percentual quanto valor fixo, ou ambos.
+          As promoções ativas aparecem na seção de destaque da home. Você pode usar tanto desconto
+          percentual quanto valor fixo, ou ambos.
         </p>
       </div>
     </div>

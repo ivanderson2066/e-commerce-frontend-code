@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { Shield } from "lucide-react";
+import Link from 'next/link';
+import { Shield } from 'lucide-react';
 
 export default function PrivacyPage() {
   return (
@@ -26,9 +26,9 @@ export default function PrivacyPage() {
             <div>
               <h2 className="font-serif text-2xl font-bold text-[#374151] mb-4">Introdução</h2>
               <p>
-                A Caiçara Mix ("nós", "nosso" ou "empresa") opera o site caicaramix.com.br. 
-                Esta página informa você sobre nossas políticas de coleta, uso e divulgação de dados pessoais 
-                quando você usa nosso site e as escolhas associadas a esses dados.
+                A Caiçara Mix ("nós", "nosso" ou "empresa") opera o site caicaramix.com.br. Esta
+                página informa você sobre nossas políticas de coleta, uso e divulgação de dados
+                pessoais quando você usa nosso site e as escolhas associadas a esses dados.
               </p>
             </div>
 
@@ -37,8 +37,8 @@ export default function PrivacyPage() {
                 1. Coleta de Dados
               </h2>
               <p>
-                Nós coletamos diferentes tipos de informações para fins diversos, a fim de fornecer e melhorar 
-                nossos serviços para você.
+                Nós coletamos diferentes tipos de informações para fins diversos, a fim de fornecer
+                e melhorar nossos serviços para você.
               </p>
               <div className="mt-4 space-y-4">
                 <div>
@@ -71,7 +71,9 @@ export default function PrivacyPage() {
               <ul className="list-disc pl-6 space-y-2 mt-4">
                 <li>Processar suas transações e enviar informações relacionadas</li>
                 <li>Responder a suas solicitações e perguntas</li>
-                <li>Enviar atualizações de pedidos e informações de marketing (com seu consentimento)</li>
+                <li>
+                  Enviar atualizações de pedidos e informações de marketing (com seu consentimento)
+                </li>
                 <li>Melhorar nosso site e serviços</li>
                 <li>Prevenir fraude e garantir segurança</li>
                 <li>Cumprir obrigações legais</li>
@@ -82,26 +84,25 @@ export default function PrivacyPage() {
               <h2 className="font-serif text-2xl font-bold text-[#374151] mb-4">
                 3. Compartilhamento de Dados
               </h2>
-              <p>
-                Não compartilhamos seus dados pessoais com terceiros, exceto:
-              </p>
+              <p>Não compartilhamos seus dados pessoais com terceiros, exceto:</p>
               <ul className="list-disc pl-6 space-y-2 mt-4">
-                <li>Com prestadores de serviço que nos ajudam a operar o site (pagamento, entrega)</li>
+                <li>
+                  Com prestadores de serviço que nos ajudam a operar o site (pagamento, entrega)
+                </li>
                 <li>Quando obrigado por lei ou para proteger direitos</li>
                 <li>Em caso de fusão ou venda da empresa (com aviso prévio)</li>
               </ul>
             </div>
 
             <div>
-              <h2 className="font-serif text-2xl font-bold text-[#374151] mb-4">
-                4. Cookies
-              </h2>
+              <h2 className="font-serif text-2xl font-bold text-[#374151] mb-4">4. Cookies</h2>
               <p>
-                Usamos cookies para melhorar sua experiência no site. Cookies são pequenos arquivos armazenados 
-                em seu dispositivo que nos ajudam a reconhecê-lo e a personalizar o conteúdo.
+                Usamos cookies para melhorar sua experiência no site. Cookies são pequenos arquivos
+                armazenados em seu dispositivo que nos ajudam a reconhecê-lo e a personalizar o
+                conteúdo.
               </p>
               <p className="mt-3">
-                Você pode controlar cookies através das configurações do seu navegador. No entanto, 
+                Você pode controlar cookies através das configurações do seu navegador. No entanto,
                 desabilitar cookies pode afetar funcionalidades do site.
               </p>
             </div>
@@ -111,9 +112,9 @@ export default function PrivacyPage() {
                 5. Segurança dos Dados
               </h2>
               <p>
-                Implementamos medidas de segurança apropriadas para proteger seus dados pessoais contra 
-                acesso não autorizado, alteração, divulgação ou destruição. No entanto, nenhum método de 
-                transmissão pela Internet é 100% seguro.
+                Implementamos medidas de segurança apropriadas para proteger seus dados pessoais
+                contra acesso não autorizado, alteração, divulgação ou destruição. No entanto,
+                nenhum método de transmissão pela Internet é 100% seguro.
               </p>
             </div>
 
@@ -132,11 +133,9 @@ export default function PrivacyPage() {
             </div>
 
             <div>
-              <h2 className="font-serif text-2xl font-bold text-[#374151] mb-4">
-                7. Contato
-              </h2>
+              <h2 className="font-serif text-2xl font-bold text-[#374151] mb-4">7. Contato</h2>
               <p>
-                Se tiver dúvidas sobre esta Política de Privacidade ou nossas práticas de dados, 
+                Se tiver dúvidas sobre esta Política de Privacidade ou nossas práticas de dados,
                 entre em contato:
               </p>
               <div className="mt-4 p-4 bg-[#F7FAF7] rounded-lg">
@@ -151,8 +150,9 @@ export default function PrivacyPage() {
                 8. Alterações na Política
               </h2>
               <p>
-                Podemos atualizar esta Política de Privacidade de tempos em tempos. Notificaremos você 
-                sobre alterações significativas publicando a nova política nesta página com uma data atualizada.
+                Podemos atualizar esta Política de Privacidade de tempos em tempos. Notificaremos
+                você sobre alterações significativas publicando a nova política nesta página com uma
+                data atualizada.
               </p>
             </div>
           </div>

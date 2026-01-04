@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { useCart } from "@/lib/cart-context";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, Trash2, Plus, Minus, Heart, ShoppingBag } from "lucide-react";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useCart } from '@/lib/cart-context';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, Trash2, Plus, Minus, Heart, ShoppingBag } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
@@ -24,7 +24,7 @@ export default function CartPage() {
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
       removeItem(productId);
-      toast.success("Produto removido do carrinho");
+      toast.success('Produto removido do carrinho');
     } else {
       updateQuantity(productId, newQuantity);
     }
@@ -34,7 +34,7 @@ export default function CartPage() {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      window.location.href = "/checkout";
+      window.location.href = '/checkout';
     }, 500);
   };
 
@@ -44,7 +44,9 @@ export default function CartPage() {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-center gap-6 py-12">
             <ShoppingBag className="h-20 w-20 text-gray-300" />
-            <h1 className="font-serif text-3xl font-bold text-[#374151]">Seu carrinho está vazio</h1>
+            <h1 className="font-serif text-3xl font-bold text-[#374151]">
+              Seu carrinho está vazio
+            </h1>
             <p className="text-gray-600 text-center max-w-md">
               Explore nossos produtos naturais e adicione seus favoritos ao carrinho.
             </p>
@@ -78,7 +80,7 @@ export default function CartPage() {
           </Link>
           <h1 className="font-serif text-3xl font-bold text-[#374151]">Seu Carrinho</h1>
           <span className="ml-auto text-sm font-medium text-gray-600">
-            {items.length} {items.length === 1 ? "item" : "itens"}
+            {items.length} {items.length === 1 ? 'item' : 'itens'}
           </span>
         </div>
 
@@ -94,12 +96,7 @@ export default function CartPage() {
                   {/* Product Image */}
                   <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 sm:h-32 sm:w-32">
                     {item.images && item.images[0] ? (
-                      <Image
-                        src={item.images[0]}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                      />
+                      <Image src={item.images[0]} alt={item.name} fill className="object-cover" />
                     ) : (
                       <div className="h-full w-full bg-gray-200 flex items-center justify-center">
                         <ShoppingBag className="h-8 w-8 text-gray-400" />
@@ -155,7 +152,7 @@ export default function CartPage() {
                       <button
                         onClick={() => {
                           removeItem(item.id);
-                          toast.success("Produto removido");
+                          toast.success('Produto removido');
                         }}
                         className="flex h-8 w-8 items-center justify-center rounded hover:bg-red-50 transition-colors group"
                       >
@@ -199,7 +196,9 @@ export default function CartPage() {
               {shippingEstimate > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Frete estimado</span>
-                  <span className="font-medium text-[#374151]">R$ {shippingEstimate.toFixed(2)}</span>
+                  <span className="font-medium text-[#374151]">
+                    R$ {shippingEstimate.toFixed(2)}
+                  </span>
                 </div>
               )}
 
@@ -226,7 +225,7 @@ export default function CartPage() {
                 disabled={isLoading}
                 className="w-full bg-[#2F7A3E] hover:bg-[#266332] text-white py-3 rounded-full font-bold transition-all hover:shadow-lg"
               >
-                {isLoading ? "Carregando..." : "Ir para Checkout"}
+                {isLoading ? 'Carregando...' : 'Ir para Checkout'}
               </Button>
 
               <button

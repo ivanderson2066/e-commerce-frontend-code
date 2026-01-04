@@ -1,20 +1,22 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
-import { toast } from "sonner";
+import { useState } from 'react';
+import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "Geral",
-    message: "",
+    name: '',
+    email: '',
+    phone: '',
+    subject: 'Geral',
+    message: '',
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -26,7 +28,7 @@ export default function ContactPage() {
     e.preventDefault();
 
     if (!formData.name || !formData.email || !formData.message) {
-      toast.error("Por favor, preencha todos os campos obrigatórios");
+      toast.error('Por favor, preencha todos os campos obrigatórios');
       return;
     }
 
@@ -37,18 +39,18 @@ export default function ContactPage() {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Here you would typically send the form data to your backend
-      console.log("Form submitted:", formData);
+      console.log('Form submitted:', formData);
 
-      toast.success("Mensagem enviada com sucesso! Responderemos em breve.");
+      toast.success('Mensagem enviada com sucesso! Responderemos em breve.');
       setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "Geral",
-        message: "",
+        name: '',
+        email: '',
+        phone: '',
+        subject: 'Geral',
+        message: '',
       });
     } catch (error) {
-      toast.error("Erro ao enviar mensagem. Tente novamente.");
+      toast.error('Erro ao enviar mensagem. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +65,8 @@ export default function ContactPage() {
             Fale Conosco
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Temos o prazer em ajudar. Entre em contato conosco para dúvidas, sugestões ou feedback sobre nossos produtos.
+            Temos o prazer em ajudar. Entre em contato conosco para dúvidas, sugestões ou feedback
+            sobre nossos produtos.
           </p>
         </div>
       </section>
@@ -101,7 +104,8 @@ export default function ContactPage() {
               <MapPin className="h-10 w-10 text-[#2F7A3E] mx-auto mb-3" />
               <h3 className="font-bold text-[#374151] mb-2">Localização</h3>
               <p className="text-gray-600 text-sm">
-                São Paulo, SP<br />
+                São Paulo, SP
+                <br />
                 Brasil
               </p>
             </div>
@@ -111,7 +115,8 @@ export default function ContactPage() {
               <Clock className="h-10 w-10 text-[#2F7A3E] mx-auto mb-3" />
               <h3 className="font-bold text-[#374151] mb-2">Horários</h3>
               <p className="text-gray-600 text-sm">
-                Seg-Sex: 9h-18h<br />
+                Seg-Sex: 9h-18h
+                <br />
                 Sab: 10h-14h
               </p>
             </div>
@@ -232,15 +237,15 @@ export default function ContactPage() {
               className="w-full flex items-center justify-center gap-2 rounded-full bg-[#2F7A3E] px-8 py-3 text-base font-bold text-white hover:bg-[#266332] transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send className="h-5 w-5" />
-              {isLoading ? "Enviando..." : "Enviar Mensagem"}
+              {isLoading ? 'Enviando...' : 'Enviar Mensagem'}
             </button>
           </form>
 
           <div className="mt-8 p-4 bg-[#2F7A3E]/10 border border-[#2F7A3E]/20 rounded-lg text-sm text-gray-700">
             <p className="font-medium text-[#2F7A3E] mb-2">Tempo de resposta:</p>
             <p>
-              Nossas equipes trabalham para responder todos os emails em até 24 horas úteis. 
-              Caso precise de suporte urgente, ligue para (11) 99999-9999.
+              Nossas equipes trabalham para responder todos os emails em até 24 horas úteis. Caso
+              precise de suporte urgente, ligue para (11) 99999-9999.
             </p>
           </div>
         </div>

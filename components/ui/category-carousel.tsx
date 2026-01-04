@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import React, { useEffect, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
 
 interface Category {
   id: string;
@@ -22,16 +22,15 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
   const [canScrollRight, setCanScrollRight] = useState(true);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
-  const scroll = (direction: "left" | "right") => {
+  const scroll = (direction: 'left' | 'right') => {
     if (!scrollContainerRef.current) return;
 
     const scrollAmount = 320; // Width of one card + gap
-    const newPosition =
-      scrollPosition + (direction === "left" ? -scrollAmount : scrollAmount);
+    const newPosition = scrollPosition + (direction === 'left' ? -scrollAmount : scrollAmount);
 
     scrollContainerRef.current.scrollTo({
       left: newPosition,
-      behavior: "smooth",
+      behavior: 'smooth',
     });
 
     setScrollPosition(newPosition);
@@ -49,10 +48,10 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (container) {
-      container.addEventListener("scroll", handleScroll);
+      container.addEventListener('scroll', handleScroll);
       handleScroll(); // Check initial state
 
-      return () => container.removeEventListener("scroll", handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
     }
   }, []);
 
@@ -65,7 +64,7 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
       {/* Left Arrow */}
       {canScrollLeft && (
         <button
-          onClick={() => scroll("left")}
+          onClick={() => scroll('left')}
           className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center transition-all hover:bg-[#2F7A3E] hover:text-white -ml-6"
           aria-label="Scroll left"
         >
@@ -78,10 +77,10 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
         ref={scrollContainerRef}
         className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4"
         style={{
-          scrollBehavior: "smooth",
-          WebkitOverflowScrolling: "touch",
-          msOverflowStyle: "none",
-          scrollbarWidth: "none",
+          scrollBehavior: 'smooth',
+          WebkitOverflowScrolling: 'touch',
+          msOverflowStyle: 'none',
+          scrollbarWidth: 'none',
         }}
       >
         {categories.map((category) => (
@@ -110,9 +109,7 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
 
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">
-                    Ver Tudo
-                  </span>
+                  <span className="text-white font-bold text-lg">Ver Tudo</span>
                 </div>
               </div>
 
@@ -128,7 +125,7 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
       {/* Right Arrow */}
       {canScrollRight && (
         <button
-          onClick={() => scroll("right")}
+          onClick={() => scroll('right')}
           className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center transition-all hover:bg-[#2F7A3E] hover:text-white -mr-6"
           aria-label="Scroll right"
         >
