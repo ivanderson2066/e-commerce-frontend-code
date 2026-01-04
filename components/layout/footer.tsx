@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Facebook, Instagram, Twitter } from 'lucide-react';
 
 export function Footer() {
   const pathname = usePathname();
 
   // Oculta o rodapé se estiver em rotas administrativas
-  if (pathname?.startsWith("/admin")) {
+  if (pathname?.startsWith('/admin')) {
     return null;
   }
 
@@ -19,25 +19,70 @@ export function Footer() {
           <div>
             <h4 className="font-serif text-lg font-bold text-white">Caiçara Mix</h4>
             <p className="mt-2 text-sm text-gray-300 leading-relaxed">
-              Beleza que vem da natureza, para você. Produtos selecionados com carinho e respeito ao meio ambiente.
+              Beleza que vem da natureza, para você. Produtos selecionados com carinho e respeito ao
+              meio ambiente.
             </p>
           </div>
-          
+
           <div>
             <h4 className="font-bold tracking-wide text-base mb-4">Institucional</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="#" className="text-gray-300 hover:text-[#A7E3B0] transition-colors">Sobre Nós</Link></li>
-              <li><Link href="#" className="text-gray-300 hover:text-[#A7E3B0] transition-colors">Blog</Link></li>
-              <li><Link href="#" className="text-gray-300 hover:text-[#A7E3B0] transition-colors">Contato</Link></li>
+              <li>
+                <Link
+                  href="/about"
+                  className="text-gray-300 hover:text-[#A7E3B0] transition-colors"
+                >
+                  Sobre Nós
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-gray-300 hover:text-[#A7E3B0] transition-colors"
+                >
+                  Contato
+                </Link>
+              </li>
+              <li>
+                <Link href="/cart" className="text-gray-300 hover:text-[#A7E3B0] transition-colors">
+                  Meu Carrinho
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/wishlist"
+                  className="text-gray-300 hover:text-[#A7E3B0] transition-colors"
+                >
+                  Favoritos
+                </Link>
+              </li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold tracking-wide text-base mb-4">Ajuda</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="#" className="text-gray-300 hover:text-[#A7E3B0] transition-colors">Dúvidas Frequentes</Link></li>
-              <li><Link href="#" className="text-gray-300 hover:text-[#A7E3B0] transition-colors">Envio e Entrega</Link></li>
-              <li><Link href="#" className="text-gray-300 hover:text-[#A7E3B0] transition-colors">Trocas e Devoluções</Link></li>
+              <li>
+                <Link href="/faq" className="text-gray-300 hover:text-[#A7E3B0] transition-colors">
+                  Dúvidas Frequentes
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-gray-300 hover:text-[#A7E3B0] transition-colors"
+                >
+                  Política de Privacidade
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-gray-300 hover:text-[#A7E3B0] transition-colors"
+                >
+                  Termos de Serviço
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -56,7 +101,7 @@ export function Footer() {
             </div>
           </div>
         </div>
-        
+
         <div className="mt-8 border-t border-gray-700 pt-8 text-center text-sm text-gray-400">
           <p>&copy; {new Date().getFullYear()} Caiçara Mix. Todos os direitos reservados.</p>
         </div>
