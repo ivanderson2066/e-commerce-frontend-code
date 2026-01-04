@@ -51,7 +51,7 @@ export function Navbar() {
   }
 
   return (
-    <header className="relative z-50 flex flex-col whitespace-nowrap bg-[#F7FAF7] shadow-sm border-b border-gray-200/80 w-full max-w-full">
+    <header className="relative z-50 flex flex-col whitespace-nowrap bg-[#2F7A3E] shadow-lg w-full max-w-full">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8 w-full">
         
         <div className="flex items-center gap-4">
