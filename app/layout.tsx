@@ -51,7 +51,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="antialiased flex flex-col min-h-screen w-full bg-[#F7FAF7] overflow-x-hidden overscroll-none">
+      <body className="antialiased flex flex-col min-h-screen w-full bg-white overflow-x-hidden overscroll-none">
         <AuthProvider>
           <CartProvider>
             <ShippingProvider>
