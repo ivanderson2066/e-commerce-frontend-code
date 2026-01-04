@@ -46,9 +46,9 @@ export function ProductCard({ product }: ProductCardProps) {
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        
+
         {/* Botão de Adicionar Rápido */}
-        <button 
+        <button
             onClick={handleAddToCart}
             className={`absolute bottom-3 right-3 h-10 w-10 rounded-full shadow-md flex items-center justify-center transition-all duration-300 ${
                 isAdded ? 'bg-[#2F7A3E] text-white opacity-100 translate-y-0' : 'bg-white text-[#2F7A3E] opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 hover:bg-[#2F7A3E] hover:text-white'
@@ -56,6 +56,21 @@ export function ProductCard({ product }: ProductCardProps) {
             title="Adicionar ao carrinho"
         >
             {isAdded ? <Check className="h-5 w-5" /> : <ShoppingBag className="h-5 w-5" />}
+        </button>
+
+        {/* Botão de Favorito */}
+        <button
+            onClick={handleToggleFavorite}
+            className="absolute top-3 right-3 h-10 w-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-300 hover:scale-110"
+            title={isFavorite(product.id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+        >
+            <Heart
+                className={`h-5 w-5 transition-all ${
+                    isFavorite(product.id)
+                        ? 'fill-red-500 text-red-500'
+                        : 'text-gray-400 group-hover:text-red-500'
+                }`}
+            />
         </button>
       </div>
 
