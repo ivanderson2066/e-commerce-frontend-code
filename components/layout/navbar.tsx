@@ -71,11 +71,11 @@ export function Navbar() {
         <div className="hidden flex-1 px-8 lg:px-16 xl:px-24 md:block max-w-full overflow-hidden">
            <SearchModal customTrigger={
              <div className="relative w-full cursor-pointer group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-hover:text-[#2F7A3E] transition-colors" />
-                <input 
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-hover:text-white transition-colors" />
+                <input
                     readOnly
-                    className="w-full rounded-full border-transparent bg-gray-100 py-2.5 pl-11 pr-4 text-sm text-[#374151] placeholder-gray-500 focus:border-[#2F7A3E] focus:ring-[#2F7A3E] cursor-pointer hover:bg-white hover:shadow-sm transition-all" 
-                    placeholder="O que você procura?" 
+                    className="w-full rounded-full border-transparent bg-white/20 py-2.5 pl-11 pr-4 text-sm text-white placeholder-white/60 focus:border-white focus:ring-white cursor-pointer hover:bg-white/30 hover:shadow-sm transition-all backdrop-blur"
+                    placeholder="O que você procura?"
                 />
              </div>
            } />
