@@ -112,29 +112,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categorias em Destaque */}
-      <section className="py-16 sm:py-24 bg-white">
+      {/* Categorias em Carrossel */}
+      <section className="py-16 sm:py-24 bg-gradient-to-b from-[#2F7A3E]/5 to-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8">
-                <h2 className="font-serif text-3xl font-bold leading-tight tracking-[-0.015em] sm:text-4xl text-[#374151]">Categorias</h2>
-            </div>
-            {loading ? (
-                 <div className="h-32 w-full bg-gray-100 animate-pulse rounded-lg"></div>
-            ) : (
-                <div className="flex flex-wrap justify-center gap-8 sm:gap-12">
-                    {categories.map((cat) => (
-                        <Link key={cat.id} href={`/category/${cat.slug}`} className="group flex flex-col items-center gap-3 text-center">
-                            <div className="relative h-28 w-28 overflow-hidden rounded-full border-2 border-transparent transition-all group-hover:border-[#2F7A3E] sm:h-32 sm:w-32 lg:h-36 lg:w-36 shadow-sm">
-                                <div 
-                                    className="absolute inset-0 h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-                                    style={{ backgroundImage: `url("${cat.image || '/placeholder.svg'}")` }}
-                                ></div>
-                            </div>
-                            <h3 className="font-bold text-sm sm:text-base text-gray-700 group-hover:text-[#2F7A3E] transition-colors">{cat.name}</h3>
-                        </Link>
-                    ))}
-                </div>
-            )}
+          <div className="mb-12">
+            <h2 className="font-serif text-3xl font-bold leading-tight tracking-[-0.015em] sm:text-4xl text-[#374151] mb-2">
+              Explore Nossas Categorias
+            </h2>
+            <p className="text-gray-600">Descubra a beleza natural em cada categoria</p>
+          </div>
+
+          {loading ? (
+            <div className="h-80 w-full bg-gray-200 animate-pulse rounded-2xl"></div>
+          ) : (
+            <CategoryCarousel categories={categories} />
+          )}
         </div>
       </section>
 
