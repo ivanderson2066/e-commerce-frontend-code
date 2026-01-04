@@ -249,7 +249,16 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div>Carregando...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F7FAF7] flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2F7A3E] mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando resultados...</p>
+          </div>
+        </div>
+      }
+    >
       <SearchContent />
     </Suspense>
   );
