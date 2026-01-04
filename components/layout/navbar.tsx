@@ -55,16 +55,16 @@ export function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8 w-full">
         
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-transparent text-[#374151] transition-colors hover:bg-gray-200/50 lg:hidden"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 lg:hidden"
           >
             <Menu className="h-6 w-6" />
           </button>
-          
-          <Link href="/" className="flex items-center gap-2 text-[#2F7A3E] hover:opacity-80 transition-opacity">
+
+          <Link href="/" className="flex items-center gap-2 text-white hover:opacity-90 transition-opacity">
             <Leaf className="h-8 w-8 flex-shrink-0" />
-            <h2 className="font-serif text-xl font-bold tracking-[-0.015em] text-[#374151]">Caiçara Mix</h2>
+            <h2 className="font-serif text-xl font-bold tracking-[-0.015em] text-white">Caiçara Mix</h2>
           </Link>
         </div>
 
