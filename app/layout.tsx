@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/footer";
 import { CartProvider } from "@/lib/cart-context";
 import { AuthProvider } from "@/lib/auth-context";
 import { ShippingProvider } from "@/lib/shipping-context";
+import { FavoritesProvider } from "@/lib/favorites-context";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
 
