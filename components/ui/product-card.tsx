@@ -3,9 +3,10 @@
 import Image from "next/image";
 import { Product } from "@/lib/data";
 import { useCart } from "@/lib/cart-context";
+import { useFavorites } from "@/lib/favorites-context";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Check } from 'lucide-react'; // Importando Lucide
+import { ShoppingBag, Check, Heart } from 'lucide-react'; // Importando Lucide
 
 interface ProductCardProps {
   product: Product;
