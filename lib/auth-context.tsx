@@ -11,6 +11,7 @@ export interface User {
   email?: string;
   name?: string;
   role?: string;
+  user_metadata?: any;
 }
 
 interface AuthContextType {
@@ -65,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: session.user.email,
           name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
           role: session.user.user_metadata?.role || 'user',
+          user_metadata: session.user.user_metadata,
         });
         checkIsAdmin(session.user);
       }
@@ -82,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: session.user.email,
           name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
           role: session.user.user_metadata?.role || 'user',
+          user_metadata: session.user.user_metadata,
         });
         checkIsAdmin(session.user);
       } else {

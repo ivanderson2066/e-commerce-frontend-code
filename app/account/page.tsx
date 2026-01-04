@@ -1,16 +1,75 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
-import { Edit2 } from 'lucide-react';
+import { Edit2, Loader2 } from 'lucide-react';
+import { useState } from "react";
+import { supabase } from "@/lib/supabase-client";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function AccountPage() {
   const { user } = useAuth();
-
-  // O Layout já cuida do redirecionamento se não houver user, mas por segurança visual:
+  const [loading, setLoading] = useState(false);
+  const [isNameOpen, setIsNameOpen] = useState(false);
+  const [isPhoneOpen, setIsPhoneOpen] = useState(false);
+  
+  // O Layout já cuida do redirecionamento se não houver user
   if (!user) return null; 
 
-  // CORREÇÃO: Cast para 'any' para evitar erro de TypeScript ao acessar user_metadata
-  const currentUser = user as any;
+  const currentUser = user;
+  const [fullName, setFullName] = useState(currentUser.user_metadata?.full_name || "");
+  const [phone, setPhone] = useState(currentUser.user_metadata?.phone || "");
+
+  const handleUpdateName = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: fullName }
+      });
+
+      if (error) throw error;
+      
+      toast.success("Nome atualizado com sucesso!");
+      setIsNameOpen(false);
+      // Recarregar página para atualizar contexto ou atualizar estado local se possível
+      window.location.reload(); 
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao atualizar nome.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePhone = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.updateUser({
+        data: { phone: phone }
+      });
+
+      if (error) throw error;
+      
+      toast.success("Telefone atualizado com sucesso!");
+      setIsPhoneOpen(false);
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao atualizar telefone.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-white p-8 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-[#EAEAEA] animate-in fade-in duration-500">
@@ -26,13 +85,38 @@ export default function AccountPage() {
           <div className="group">
             <label className="block text-sm font-medium text-[#333333] mb-2">Nome Completo</label>
             <div className="flex items-center justify-between p-4 bg-[#F9F9F9] rounded-lg border border-transparent group-hover:border-[#E0E0E0] transition-colors">
-              {/* Agora verifica user.name E user_metadata.full_name sem dar erro */}
               <p className="text-gray-700 font-medium">
-                {user.name || currentUser.user_metadata?.full_name || 'Usuário'}
+                {user.user_metadata?.full_name || 'Usuário'}
               </p>
-              <button className="text-sm font-medium text-[#556B2F] hover:underline flex items-center gap-1">
-                <Edit2 className="h-3 w-3" /> Editar
-              </button>
+              
+              <Dialog open={isNameOpen} onOpenChange={setIsNameOpen}>
+                <DialogTrigger asChild>
+                  <button className="text-sm font-medium text-[#556B2F] hover:underline flex items-center gap-1">
+                    <Edit2 className="h-3 w-3" /> Editar
+                  </button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Editar Nome</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Nome Completo</Label>
+                      <Input 
+                        id="name" 
+                        value={fullName} 
+                        onChange={(e) => setFullName(e.target.value)} 
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsNameOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleUpdateName} disabled={loading} className="bg-[#2F7A3E]">
+                      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
@@ -52,9 +136,36 @@ export default function AccountPage() {
               <p className="text-gray-500 italic">
                 {currentUser.user_metadata?.phone || "Nenhum telefone cadastrado"}
               </p>
-              <button className="text-sm font-bold text-[#556B2F] hover:underline">
-                {currentUser.user_metadata?.phone ? "Alterar" : "Adicionar"}
-              </button>
+              
+              <Dialog open={isPhoneOpen} onOpenChange={setIsPhoneOpen}>
+                <DialogTrigger asChild>
+                  <button className="text-sm font-bold text-[#556B2F] hover:underline">
+                    {currentUser.user_metadata?.phone ? "Alterar" : "Adicionar"}
+                  </button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{currentUser.user_metadata?.phone ? "Alterar Telefone" : "Adicionar Telefone"}</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="phone">Telefone</Label>
+                      <Input 
+                        id="phone" 
+                        value={phone} 
+                        onChange={(e) => setPhone(e.target.value)} 
+                        placeholder="(00) 00000-0000"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsPhoneOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleUpdatePhone} disabled={loading} className="bg-[#2F7A3E]">
+                      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
