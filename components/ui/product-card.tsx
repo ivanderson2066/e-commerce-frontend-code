@@ -14,6 +14,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [isAdded, setIsAdded] = useState(false);
   const router = useRouter();
 
@@ -23,6 +24,12 @@ export function ProductCard({ product }: ProductCardProps) {
     addItem(product);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await toggleFavorite(product.id, product.name);
   };
 
   const handleViewDetails = () => {
