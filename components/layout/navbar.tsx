@@ -160,7 +160,24 @@ export function Navbar() {
                     </Link>
                 ))}
              </nav>
-             <div className="flex flex-col gap-3 pt-2 border-t border-gray-100">
+             <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
+                <Link href="/cart" className="flex items-center gap-2 text-[#374151] font-medium py-2 px-2 hover:text-[#2F7A3E]" onClick={() => setIsMenuOpen(false)}>
+                    <ShoppingBag className="h-5 w-5" /> Carrinho
+                </Link>
+                <Link href="/wishlist" className="flex items-center gap-2 text-[#374151] font-medium py-2 px-2 hover:text-[#2F7A3E]" onClick={() => setIsMenuOpen(false)}>
+                    <Heart className="h-5 w-5" /> Favoritos
+                </Link>
+                <div className="border-t border-gray-50 my-1"></div>
+                <Link href="/about" className="flex items-center gap-2 text-[#374151] font-medium py-2 px-2 hover:text-[#2F7A3E]" onClick={() => setIsMenuOpen(false)}>
+                    Sobre Nós
+                </Link>
+                <Link href="/contact" className="flex items-center gap-2 text-[#374151] font-medium py-2 px-2 hover:text-[#2F7A3E]" onClick={() => setIsMenuOpen(false)}>
+                    Contato
+                </Link>
+                <Link href="/faq" className="flex items-center gap-2 text-[#374151] font-medium py-2 px-2 hover:text-[#2F7A3E]" onClick={() => setIsMenuOpen(false)}>
+                    Dúvidas Frequentes
+                </Link>
+                <div className="border-t border-gray-50 my-1"></div>
                 {user ? (
                     <>
                         {/* BOTAO ADMIN MOBILE */}
