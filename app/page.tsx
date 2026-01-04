@@ -130,29 +130,77 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Banner Promocional */}
-      <section className="py-16 sm:py-24 bg-[#F7FAF7]">
+      {/* Promoções em Destaque */}
+      <section className="py-16 sm:py-24 bg-gradient-to-b from-[#2F7A3E]/10 to-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 className="font-serif text-3xl font-bold leading-tight tracking-[-0.015em] sm:text-4xl text-[#374151] mb-8">
+            🎉 Promoções em Destaque
+          </h2>
+
+          {loading ? (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <Link href="/category/skincare" className="group relative flex min-h-[250px] items-end justify-start overflow-hidden rounded-2xl p-8 shadow-md transition-all hover:shadow-xl">
-                    <div className="absolute inset-0 h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBcwoeO2HZ3gmQBICV2pvBOkCvlmwAO8HTcqvX3nuUJSwrL3FFH2WlLvJ_85GqZ3_yHb61MHkr5Ki4-AjAK3zCsQA241E7yYC6ZccPnMTh4i5yn8nj6m-5_hOIheYfAdQlfc44jg9HbmBc3akAI7sBolrpgHIle1TSusQMxgy3kXp4WCxalSPmfkfeH6JAYnJSbNYt5Z1bAZrCntqRE-AaGok-ZldKHAoEin-JnK1mcE9MjhbuolowzdgYwru3s-y_BtilxFg9d3lik")'}}></div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+              <div className="h-64 bg-gray-200 rounded-2xl animate-pulse"></div>
+              <div className="h-64 bg-gray-200 rounded-2xl animate-pulse"></div>
+            </div>
+          ) : (
+            <>
+              {/* Promoções Dinâmicas */}
+              {featuredProducts && featuredProducts.length > 0 ? (
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  {featuredProducts.slice(0, 2).map((promo: any) => (
+                    <Link
+                      key={promo.id}
+                      href={`/product/${promo.id}`}
+                      className="group relative flex min-h-[250px] items-end justify-start overflow-hidden rounded-2xl p-8 shadow-md transition-all hover:shadow-xl"
+                    >
+                      <div
+                        className="absolute inset-0 h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                        style={{
+                          backgroundImage: `url("${promo.images?.[0] || '/placeholder.svg'}")`,
+                        }}
+                      ></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                      <div className="relative text-white z-10">
+                        <span className="rounded-full bg-[#2F7A3E] px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                          Promoção
+                        </span>
+                        <h3 className="mt-3 font-serif text-3xl font-bold">
+                          {promo.name}
+                        </h3>
+                        <p className="mt-1 text-green-100">
+                          {promo.description || "Aproveite esta promoção especial"}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  {/* Fallback Estático */}
+                  <Link href="/category/skincare" className="group relative flex min-h-[250px] items-end justify-start overflow-hidden rounded-2xl p-8 shadow-md transition-all hover:shadow-xl">
+                    <div className="absolute inset-0 h-full w-full bg-gradient-to-br from-[#A7E3B0] to-[#2F7A3E]"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
                     <div className="relative text-white z-10">
-                        <span className="rounded-full bg-[#ef4444] px-3 py-1 text-xs font-bold uppercase tracking-wider">20% OFF</span>
-                        <h3 className="mt-3 font-serif text-3xl font-bold">Kit Skincare</h3>
-                        <p className="mt-1 text-gray-100">Renove sua pele com nosso kit completo.</p>
+                      <span className="rounded-full bg-white/20 backdrop-blur px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                        15% OFF
+                      </span>
+                      <h3 className="mt-3 font-serif text-3xl font-bold">Kit Skincare Natural</h3>
+                      <p className="mt-1 text-green-100">Cuide da sua pele com ingredientes puros</p>
                     </div>
-                </Link>
-                <Link href="/category/oleos" className="group relative flex min-h-[250px] items-end justify-start overflow-hidden rounded-2xl bg-[#2F7A3E] p-8 text-white shadow-md transition-all hover:shadow-xl">
+                  </Link>
+                  <Link href="/category/cabelos" className="group relative flex min-h-[250px] items-end justify-start overflow-hidden rounded-2xl bg-gradient-to-br from-[#2F7A3E] to-[#1d5a2f] p-8 text-white shadow-md transition-all hover:shadow-xl">
                     <div className="absolute -bottom-6 -right-6 text-white/10 rotate-12">
-                        <Tag className="h-48 w-48" />
+                      <Tag className="h-48 w-48" />
                     </div>
                     <div className="relative z-10">
-                        <h3 className="font-serif text-3xl font-bold">Promoção PIX</h3>
-                        <p className="mt-1 text-green-100">Pague via PIX e ganhe 3% de desconto em qualquer produto.</p>
+                      <h3 className="font-serif text-3xl font-bold">Promoção PIX</h3>
+                      <p className="mt-1 text-green-100">Pague via PIX e ganhe 3% de desconto adicional</p>
                     </div>
-                </Link>
-            </div>
+                  </Link>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 
