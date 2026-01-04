@@ -7,7 +7,7 @@ import { CartSheet } from "@/components/cart/cart-sheet";
 import { useAuth } from "@/lib/auth-context";
 import { SearchModal } from "@/components/search/search-modal";
 import { useCart } from "@/lib/cart-context";
-import { Menu, User, LogOut, ShoppingBag, Search, Leaf, LayoutDashboard } from 'lucide-react';
+import { Menu, User, LogOut, ShoppingBag, Search, Leaf, LayoutDashboard, Heart } from 'lucide-react';
 import { supabase } from "@/lib/supabase-client";
 
 export function Navbar() {
