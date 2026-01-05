@@ -12,6 +12,7 @@ interface FavoritesContextType {
   addFavorite: (productId: string, productName?: string) => Promise<void>;
   removeFavorite: (productId: string) => Promise<void>;
   loading: boolean;
+  isAuthenticated: boolean;
 }
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
@@ -21,67 +22,15 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Carregar favoritos ao montar ou quando o usuário muda
+  // Load favorites from database when user is authenticated
   useEffect(() => {
     if (user?.id) {
-      syncLocalFavorites(user.id);
+      loadFavorites();
     } else {
-      // Para usuários não logados, carregar do localStorage
-      const saved = localStorage.getItem('favorites');
-      if (saved) {
-        try {
-          setFavorites(JSON.parse(saved));
-        } catch (error) {
-          console.error('Error loading favorites from localStorage:', error);
-        }
-      }
+      // Clear favorites if user logs out
+      setFavorites([]);
     }
   }, [user?.id]);
-
-  const syncLocalFavorites = async (userId: string) => {
-    try {
-      setLoading(true);
-      const localFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-
-      if (localFavorites.length > 0) {
-        // Merge local favorites with server favorites
-        const { error: upsertError } = await supabase.from('favorites').upsert(
-          localFavorites.map((productId: string) => ({
-            user_id: userId,
-            product_id: productId,
-          })),
-          { onConflict: 'user_id,product_id', ignoreDuplicates: true }
-        );
-
-        if (!upsertError) {
-          // Clear local favorites after successful sync
-          localStorage.removeItem('favorites');
-        }
-      }
-
-      // Load all favorites (merged + existing ones)
-      const { data, error } = await supabase
-        .from('favorites')
-        .select('product_id')
-        .eq('user_id', userId);
-
-      if (error) throw error;
-
-      const favoriteIds = data?.map((fav) => fav.product_id) || [];
-      setFavorites(favoriteIds);
-    } catch (error) {
-      console.error('Error syncing favorites:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Salvar em localStorage quando mudar (para usuários não logados)
-  useEffect(() => {
-    if (!user?.id) {
-      localStorage.setItem('favorites', JSON.stringify(favorites));
-    }
-  }, [favorites, user?.id]);
 
   const loadFavorites = async () => {
     if (!user?.id) return;
@@ -109,12 +58,9 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addFavorite = async (productId: string, productName: string = '') => {
+    // Only authenticated users can add favorites
     if (!user?.id) {
-      // Para usuários não logados, apenas add ao localStorage
-      if (!favorites.includes(productId)) {
-        setFavorites([...favorites, productId]);
-        toast.success(`${productName || 'Produto'} adicionado aos favoritos!`);
-      }
+      toast.error('Faça login para adicionar favoritos');
       return;
     }
 
@@ -145,10 +91,9 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeFavorite = async (productId: string) => {
+    // Only authenticated users can remove favorites
     if (!user?.id) {
-      // Para usuários não logados, apenas remove do localStorage
-      setFavorites(favorites.filter((id) => id !== productId));
-      toast.success('Produto removido dos favoritos');
+      toast.error('Faça login para remover favoritos');
       return;
     }
 
@@ -186,6 +131,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
         addFavorite,
         removeFavorite,
         loading,
+        isAuthenticated: !!user?.id,
       }}
     >
       {children}
