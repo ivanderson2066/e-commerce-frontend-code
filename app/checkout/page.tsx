@@ -32,21 +32,23 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { items, totalPrice, clearCart } = useCart();
-  
-  const { 
-    selectedShipping, 
-    shippingOptions, 
-    calculateShipping, 
-    selectShipping, 
+  const { addresses } = useAddresses();
+
+  const {
+    selectedShipping,
+    shippingOptions,
+    calculateShipping,
+    selectShipping,
     isLoading: isShippingLoading,
-    error: shippingError 
+    error: shippingError
   } = useShipping();
-  
+
   const [step, setStep] = useState<CheckoutStep>("shipping");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [error, setError] = useState<string>("");
   const [orderData, setOrderData] = useState<OrderData | null>(null);
-  
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+
   // Estados para Polling do PIX
   const [pixStatus, setPixStatus] = useState<'pending' | 'paid'>('pending');
   const pollingInterval = useRef<NodeJS.Timeout | null>(null);
