@@ -115,4 +115,5 @@ export const indexes = [
   "CREATE INDEX idx_orders_status ON orders(status);",
   "CREATE INDEX idx_reviews_product_id ON reviews(product_id);",
   "CREATE INDEX idx_favorites_user_id ON favorites(user_id);",
+  "CREATE INDEX idx_addresses_user_id ON addresses(user_id);",
 ];
