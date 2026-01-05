@@ -10,6 +10,7 @@ import { ChevronLeft, Trash2, Plus, Minus, Heart, ShoppingBag } from 'lucide-rea
 import { toast } from 'sonner';
 
 export default function CartPage() {
+  const router = useRouter();
   const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -33,10 +34,7 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      window.location.href = '/checkout';
-    }, 500);
+    router.push('/checkout');
   };
 
   if (items.length === 0) {
