@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { ProductCard } from '@/components/ui/product-card';
 import { CategoryCarousel } from '@/components/ui/category-carousel';
+import { FeaturedCarousel } from '@/components/ui/featured-carousel';
 import { supabase } from '@/lib/supabase-client';
 // Importando ícones Lucide
 import { Loader2, Leaf, Heart, Recycle, Star, Tag } from 'lucide-react';
