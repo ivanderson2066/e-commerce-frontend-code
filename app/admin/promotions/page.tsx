@@ -129,8 +129,8 @@ export default function PromotionsPage() {
       discount_amount: promo.discount_amount,
       image: promo.image,
       active: promo.active,
-      start_date: promo.start_date,
-      end_date: promo.end_date,
+      start_date: promo.start_date ? promo.start_date.slice(0, 16) : '',
+      end_date: promo.end_date ? promo.end_date.slice(0, 16) : '',
     });
     setIsFormOpen(true);
   };
