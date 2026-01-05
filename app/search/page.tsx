@@ -68,17 +68,18 @@ function SearchContent() {
       filtered = filtered.filter((p) => p.category === selectedCategory);
     }
 
-    // Sort
+    // Sort - Create shallow copy to avoid mutation
+    let sorted = [...filtered];
     if (sortBy === 'menor-preco') {
-      filtered.sort((a, b) => a.price - b.price);
+      sorted.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'maior-preco') {
-      filtered.sort((a, b) => b.price - a.price);
+      sorted.sort((a, b) => b.price - a.price);
     } else if (sortBy === 'mais-novo') {
-      filtered.reverse();
+      sorted.reverse();
     }
-    // default is "relevancia"
+    // default is "relevancia" - no sort needed if products are already sorted by relevance
 
-    setFilteredProducts(filtered);
+    setFilteredProducts(sorted);
   }, [products, searchQuery, selectedCategory, sortBy]);
 
   return (
