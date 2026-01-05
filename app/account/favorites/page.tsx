@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/lib/auth-context';
 import { useFavorites } from '@/lib/favorites-context';
 import { supabase } from '@/lib/supabase-client';
 import { ProductCard } from '@/components/ui/product-card';
-import { Heart, ShoppingBag } from 'lucide-react';
+import { Heart, ShoppingBag, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface Product {
@@ -18,6 +19,7 @@ interface Product {
 }
 
 export default function FavoritesPage() {
+  const { user } = useAuth();
   const { favorites, loading: favoritesLoading } = useFavorites();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,12 +31,19 @@ export default function FavoritesPage() {
       try {
         setLoading(true);
 
-        if (favorites.length === 0) {
+        if (!user?.id) {
           setProducts([]);
+          setLoading(false);
           return;
         }
 
-        // Buscar produtos pelos IDs dos favoritos
+        if (favorites.length === 0) {
+          setProducts([]);
+          setLoading(false);
+          return;
+        }
+
+        // Buscar produtos pelos IDs dos favoritos salvos no banco
         const { data, error } = await supabase
           .from('products')
           .select('*')
@@ -42,19 +51,21 @@ export default function FavoritesPage() {
 
         if (error) {
           console.error('Error loading favorite products:', error);
+          setProducts([]);
           return;
         }
 
         setProducts(data || []);
       } catch (error) {
         console.error('Error:', error);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
     }
 
     loadFavoriteProducts();
-  }, [favorites, favoritesLoading]);
+  }, [favorites, favoritesLoading, user?.id]);
 
   if (loading || favoritesLoading) {
     return (
