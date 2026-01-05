@@ -381,6 +381,14 @@ export default function CheckoutPage() {
 
               {step === "shipping" && (
                 <form onSubmit={handleShippingSubmit} className="space-y-6">
+                   {/* Seletor de Endereços Salvos */}
+                   {user && addresses.length > 0 && (
+                     <SavedAddressSelector
+                       onAddressSelect={handleAddressSelect}
+                       selectedAddressId={selectedAddress?.id}
+                     />
+                   )}
+
                    {/* Campos do formulário de envio (mantidos do seu código original) */}
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
