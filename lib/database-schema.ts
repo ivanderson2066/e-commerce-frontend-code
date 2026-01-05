@@ -73,6 +73,24 @@ export const databaseSchema = {
     updated_at: "timestamp DEFAULT now()"
   },
 
+  // Tabela de endereços salvos
+  addresses: {
+    id: "uuid PRIMARY KEY",
+    user_id: "uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE",
+    name: "varchar NOT NULL",
+    street: "varchar NOT NULL",
+    number: "varchar NOT NULL",
+    complement: "varchar",
+    city: "varchar NOT NULL",
+    state: "varchar NOT NULL",
+    cep: "varchar NOT NULL",
+    country: "varchar DEFAULT 'Brasil'",
+    is_default: "boolean DEFAULT false",
+    address_type: "enum('shipping', 'billing', 'both') DEFAULT 'shipping'",
+    created_at: "timestamp DEFAULT now()",
+    updated_at: "timestamp DEFAULT now()"
+  },
+
   // Tabela de cupons
   coupons: {
     id: "uuid PRIMARY KEY",
