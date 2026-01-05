@@ -24,7 +24,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   // Carregar favoritos ao montar ou quando o usuário muda
   useEffect(() => {
     if (user?.id) {
-      loadFavorites();
+      syncLocalFavorites(user.id);
     } else {
       // Para usuários não logados, carregar do localStorage
       const saved = localStorage.getItem('favorites');
@@ -37,6 +37,44 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }, [user?.id]);
+
+  const syncLocalFavorites = async (userId: string) => {
+    try {
+      setLoading(true);
+      const localFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+      if (localFavorites.length > 0) {
+        // Merge local favorites with server favorites
+        const { error: upsertError } = await supabase.from('favorites').upsert(
+          localFavorites.map((productId: string) => ({
+            user_id: userId,
+            product_id: productId,
+          })),
+          { onConflict: 'user_id,product_id', ignoreDuplicates: true }
+        );
+
+        if (!upsertError) {
+          // Clear local favorites after successful sync
+          localStorage.removeItem('favorites');
+        }
+      }
+
+      // Load all favorites (merged + existing ones)
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('product_id')
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      const favoriteIds = data?.map((fav) => fav.product_id) || [];
+      setFavorites(favoriteIds);
+    } catch (error) {
+      console.error('Error syncing favorites:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Salvar em localStorage quando mudar (para usuários não logados)
   useEffect(() => {
