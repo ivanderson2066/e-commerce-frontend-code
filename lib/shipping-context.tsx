@@ -95,13 +95,19 @@ export function ShippingProvider({ children }: { children: React.ReactNode }) {
     setSelectedShipping(option);
   };
 
+  const selectAddress = (address: Address | null) => {
+    setSelectedAddressState(address);
+  };
+
   return (
     <ShippingContext.Provider
       value={{
         selectedShipping,
         shippingOptions,
+        selectedAddress,
         calculateShipping,
         selectShipping,
+        selectAddress,
         isLoading,
         error
       }}
