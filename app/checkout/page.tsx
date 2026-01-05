@@ -84,6 +84,21 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
+  const handleAddressSelect = (address: Address | null) => {
+    setSelectedAddress(address);
+    if (address) {
+      setFormData(prev => ({
+        ...prev,
+        street: address.street,
+        number: address.number,
+        complement: address.complement || "",
+        city: address.city,
+        state: address.state,
+        cep: address.cep,
+      }));
+    }
+  };
+
   // Polling Logic para PIX Transparente
   useEffect(() => {
     // Só ativa se estiver na etapa de confirmação, for PIX e tivermos os IDs
