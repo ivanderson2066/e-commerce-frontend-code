@@ -31,9 +31,10 @@ const ShippingContext = createContext<ShippingContextType | undefined>(undefined
 export function ShippingProvider({ children }: { children: React.ReactNode }) {
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [selectedAddress, setSelectedAddressState] = useState<Address | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const { items } = useCart();
 
   const calculateShipping = async (cep: string) => {
