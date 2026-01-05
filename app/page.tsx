@@ -110,11 +110,19 @@ export default function Home() {
               <Loader2 className="h-10 w-10 animate-spin text-[#2F7A3E]" />
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8 lg:gap-x-6 lg:gap-y-10">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            <>
+              {/* Featured Carousel with Auto-scroll */}
+              <div className="mb-12">
+                <FeaturedCarousel products={featuredProducts} />
+              </div>
+
+              {/* Featured Products Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8 lg:gap-x-6 lg:gap-y-10">
+                {featuredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </>
           )}
 
           <div className="mt-8 text-center sm:hidden">
