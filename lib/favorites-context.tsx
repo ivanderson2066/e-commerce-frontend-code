@@ -148,6 +148,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     if (!user?.id) {
       // Para usuários não logados, apenas remove do localStorage
       setFavorites(favorites.filter((id) => id !== productId));
+      toast.success('Produto removido dos favoritos');
       return;
     }
 
