@@ -4,6 +4,7 @@
 
 import { createContext, useContext, useState } from "react";
 import { useCart } from "@/lib/cart-context";
+import { Address } from "./addresses-context";
 
 export interface ShippingOption {
   id: string;
@@ -17,8 +18,10 @@ export interface ShippingOption {
 interface ShippingContextType {
   selectedShipping: ShippingOption | null;
   shippingOptions: ShippingOption[];
+  selectedAddress: Address | null;
   calculateShipping: (cep: string) => Promise<void>;
   selectShipping: (option: ShippingOption) => void;
+  selectAddress: (address: Address | null) => void;
   isLoading: boolean;
   error: string | null;
 }
