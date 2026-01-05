@@ -54,12 +54,14 @@ export default function RootLayout({
           <CartProvider>
             <ShippingProvider>
               <FavoritesProvider>
-                <Navbar />
+                <AddressesProvider>
+                  <Navbar />
 
-                <main className="flex-grow w-full relative flex flex-col">{children}</main>
+                  <main className="flex-grow w-full relative flex flex-col">{children}</main>
 
-                <Footer />
-                <Toaster />
+                  <Footer />
+                  <Toaster />
+                </AddressesProvider>
               </FavoritesProvider>
             </ShippingProvider>
           </CartProvider>
