@@ -69,8 +69,9 @@ export default function FavoritesPage() {
 
   if (loading || favoritesLoading) {
     return (
-      <div className="flex justify-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2F7A3E]"></div>
+      <div className="flex flex-col items-center justify-center py-20">
+        <Loader2 className="h-12 w-12 animate-spin text-[#2F7A3E] mb-4" />
+        <p className="text-gray-600">Carregando seus favoritos...</p>
       </div>
     );
   }
