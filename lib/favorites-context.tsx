@@ -113,6 +113,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       // Para usuários não logados, apenas add ao localStorage
       if (!favorites.includes(productId)) {
         setFavorites([...favorites, productId]);
+        toast.success(`${productName || 'Produto'} adicionado aos favoritos!`);
       }
       return;
     }
