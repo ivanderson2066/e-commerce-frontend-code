@@ -106,6 +106,7 @@ const productSchema = z.object({
   width: z.coerce.number().min(1, "Mínimo 1cm"),
   height: z.coerce.number().min(1, "Mínimo 1cm"),
   length: z.coerce.number().min(1, "Mínimo 1cm"),
+  sales_count: z.coerce.number().min(0, "Vendas não pode ser negativo").optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -133,17 +134,19 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
       width: initialData.width || 15,
       height: initialData.height || 5,
       length: initialData.length || 20,
+      sales_count: initialData.sales_count || 0,
     } : {
       name: "",
       description: "",
       price: 0,
-      stock: 0, 
+      stock: 0,
       category: "",
       images: [],
       weight: 0.300,
       width: 15,
       height: 5,
       length: 20,
+      sales_count: 0,
     },
   });
 
@@ -183,7 +186,7 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
         name: data.name,
         description: data.description,
         price: data.price,
-        stock: Number(data.stock), 
+        stock: Number(data.stock),
         category: data.category,
         category_id: selectedCategory?.id,
         images: finalImageUrls,
@@ -192,6 +195,7 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
         width: data.width,
         height: data.height,
         length: data.length,
+        sales_count: data.sales_count || 0,
         ...(initialData ? {} : {
             slug: data.name.toLowerCase()
             .replace(/[áàãâä]/g, 'a').replace(/[éèêë]/g, 'e').replace(/[íìîï]/g, 'i').replace(/[óòõôö]/g, 'o').replace(/[úùûü]/g, 'u').replace(/[ç]/g, 'c')
