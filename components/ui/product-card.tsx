@@ -14,7 +14,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite, isAuthenticated } = useFavorites();
   const [isAdded, setIsAdded] = useState(false);
   const router = useRouter();
 
@@ -29,6 +29,12 @@ export function ProductCard({ product }: ProductCardProps) {
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      router.push('/login?redirect=/product/' + (product.slug || product.id));
+      return;
+    }
+
     await toggleFavorite(product.id, product.name);
   };
 

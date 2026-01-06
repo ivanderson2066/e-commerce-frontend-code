@@ -23,17 +23,16 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
-    if (!scrollContainerRef.current) return;
+    const container = scrollContainerRef.current;
+    if (!container) return;
 
     const scrollAmount = 320; // Width of one card + gap
-    const newPosition = scrollPosition + (direction === 'left' ? -scrollAmount : scrollAmount);
+    const newPosition = container.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
 
-    scrollContainerRef.current.scrollTo({
+    container.scrollTo({
       left: newPosition,
       behavior: 'smooth',
     });
-
-    setScrollPosition(newPosition);
   };
 
   const handleScroll = () => {

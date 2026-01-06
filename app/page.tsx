@@ -5,12 +5,15 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { ProductCard } from '@/components/ui/product-card';
 import { CategoryCarousel } from '@/components/ui/category-carousel';
+import { FeaturedCarousel } from '@/components/ui/featured-carousel';
+import { BestSellersCarousel } from '@/components/ui/best-sellers-carousel';
 import { supabase } from '@/lib/supabase-client';
 // Importando ícones Lucide
-import { Loader2, Leaf, Heart, Recycle, Star, Tag } from 'lucide-react';
+import { Loader2, Leaf, Heart, Recycle, Star, Tag, TrendingUp } from 'lucide-react';
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const [bestSellers, setBestSellers] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,9 +27,17 @@ export default function Home() {
         .eq('featured', true)
         .limit(4);
 
+      // Best sellers: order by sales_count
+      const { data: bestSellersData } = await supabase
+        .from('products')
+        .select('*')
+        .order('sales_count', { ascending: false })
+        .limit(8);
+
       const { data: categoriesData } = await supabase.from('categories').select('*');
 
       if (productsData) setFeaturedProducts(productsData);
+      if (bestSellersData) setBestSellers(bestSellersData);
       if (categoriesData) setCategories(categoriesData);
 
       setLoading(false);
@@ -92,10 +103,13 @@ export default function Home() {
       {/* Produtos em Destaque */}
       <section className="py-16 sm:py-24 bg-[#F7FAF7]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="font-serif text-3xl font-bold leading-tight tracking-[-0.015em] sm:text-4xl text-[#374151]">
-              Produtos em Destaque
-            </h2>
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="font-serif text-3xl font-bold leading-tight tracking-[-0.015em] sm:text-4xl text-[#374151]">
+                Destaques Especiais
+              </h2>
+              <p className="text-gray-600 mt-2">Conheça nossos produtos mais procurados</p>
+            </div>
             <Link
               href="/category/todos"
               className="hidden sm:flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-[#2F7A3E] bg-transparent px-6 py-2 text-sm font-bold leading-normal text-[#2F7A3E] shadow-sm transition-colors hover:bg-[#2F7A3E]/10"
@@ -109,11 +123,10 @@ export default function Home() {
               <Loader2 className="h-10 w-10 animate-spin text-[#2F7A3E]" />
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8 lg:gap-x-6 lg:gap-y-10">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            <>
+              {/* Featured Carousel with Auto-scroll */}
+              <FeaturedCarousel products={featuredProducts} />
+            </>
           )}
 
           <div className="mt-8 text-center sm:hidden">
@@ -145,85 +158,91 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Promoções em Destaque */}
-      <section className="py-16 sm:py-24 bg-gradient-to-b from-[#2F7A3E]/10 to-white">
+      {/* Campeões de Vendas */}
+      <section className="py-16 sm:py-24 bg-white border-b border-gray-100">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="font-serif text-3xl font-bold leading-tight tracking-[-0.015em] sm:text-4xl text-[#374151] mb-8">
-            🎉 Promoções em Destaque
-          </h2>
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <TrendingUp className="h-6 w-6 text-[#2F7A3E]" />
+                <h2 className="font-serif text-3xl font-bold leading-tight tracking-[-0.015em] sm:text-4xl text-[#374151]">
+                  Campeões de Vendas
+                </h2>
+              </div>
+              <p className="text-gray-600">Os produtos mais amados pelos nossos clientes</p>
+            </div>
+            <Link
+              href="/category/todos"
+              className="hidden sm:flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-[#2F7A3E] bg-transparent px-6 py-2 text-sm font-bold leading-normal text-[#2F7A3E] shadow-sm transition-colors hover:bg-[#2F7A3E]/10"
+            >
+              <span className="truncate">Ver Mais</span>
+            </Link>
+          </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="h-64 bg-gray-200 rounded-2xl animate-pulse"></div>
-              <div className="h-64 bg-gray-200 rounded-2xl animate-pulse"></div>
+            <div className="flex justify-center py-20">
+              <Loader2 className="h-10 w-10 animate-spin text-[#2F7A3E]" />
             </div>
+          ) : bestSellers.length > 0 ? (
+            <BestSellersCarousel products={bestSellers} />
           ) : (
-            <>
-              {/* Promoções Dinâmicas */}
-              {featuredProducts && featuredProducts.length > 0 ? (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {featuredProducts.slice(0, 2).map((promo: any) => (
-                    <Link
-                      key={promo.id}
-                      href={`/product/${promo.id}`}
-                      className="group relative flex min-h-[250px] items-end justify-start overflow-hidden rounded-2xl p-8 shadow-md transition-all hover:shadow-xl"
-                    >
-                      <div
-                        className="absolute inset-0 h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                        style={{
-                          backgroundImage: `url("${promo.images?.[0] || '/placeholder.svg'}")`,
-                        }}
-                      ></div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                      <div className="relative text-white z-10">
-                        <span className="rounded-full bg-[#2F7A3E] px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                          Promoção
-                        </span>
-                        <h3 className="mt-3 font-serif text-3xl font-bold">{promo.name}</h3>
-                        <p className="mt-1 text-green-100">
-                          {promo.description || 'Aproveite esta promoção especial'}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {/* Fallback Estático */}
-                  <Link
-                    href="/category/skincare"
-                    className="group relative flex min-h-[250px] items-end justify-start overflow-hidden rounded-2xl p-8 shadow-md transition-all hover:shadow-xl"
-                  >
-                    <div className="absolute inset-0 h-full w-full bg-gradient-to-br from-[#A7E3B0] to-[#2F7A3E]"></div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-                    <div className="relative text-white z-10">
-                      <span className="rounded-full bg-white/20 backdrop-blur px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                        15% OFF
-                      </span>
-                      <h3 className="mt-3 font-serif text-3xl font-bold">Kit Skincare Natural</h3>
-                      <p className="mt-1 text-green-100">
-                        Cuide da sua pele com ingredientes puros
-                      </p>
-                    </div>
-                  </Link>
-                  <Link
-                    href="/category/cabelos"
-                    className="group relative flex min-h-[250px] items-end justify-start overflow-hidden rounded-2xl bg-gradient-to-br from-[#2F7A3E] to-[#1d5a2f] p-8 text-white shadow-md transition-all hover:shadow-xl"
-                  >
-                    <div className="absolute -bottom-6 -right-6 text-white/10 rotate-12">
-                      <Tag className="h-48 w-48" />
-                    </div>
-                    <div className="relative z-10">
-                      <h3 className="font-serif text-3xl font-bold">Promoção PIX</h3>
-                      <p className="mt-1 text-green-100">
-                        Pague via PIX e ganhe 3% de desconto adicional
-                      </p>
-                    </div>
-                  </Link>
-                </div>
-              )}
-            </>
+            <div className="text-center py-12">
+              <p className="text-gray-500">Produtos não disponíveis no momento.</p>
+            </div>
           )}
+
+          <div className="mt-8 text-center sm:hidden">
+            <Link
+              href="/category/todos"
+              className="flex w-full min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-[#2F7A3E] bg-transparent px-8 py-3 text-base font-bold leading-normal text-[#2F7A3E] shadow-sm transition-colors hover:bg-[#2F7A3E]/10"
+            >
+              <span className="truncate">Ver todos os campeões</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Promoções e Benefícios */}
+      <section className="py-16 sm:py-24 bg-gradient-to-b from-white to-[#2F7A3E]/5">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Promoção 1 */}
+            <Link
+              href="/category/skincare"
+              className="group relative flex min-h-[280px] items-end justify-start overflow-hidden rounded-2xl p-8 shadow-sm transition-all hover:shadow-lg border border-[#e5e7eb]"
+            >
+              <div className="absolute inset-0 h-full w-full bg-gradient-to-br from-[#A7E3B0] via-[#7EC88E] to-[#2F7A3E]"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+              <div className="relative text-white z-10">
+                <span className="rounded-full bg-white/20 backdrop-blur px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                  15% OFF
+                </span>
+                <h3 className="mt-4 font-serif text-3xl font-bold leading-tight">
+                  Kit Skincare Completo
+                </h3>
+                <p className="mt-2 text-green-50 text-sm">
+                  Cuide da sua pele com ingredientes 100% naturais
+                </p>
+              </div>
+            </Link>
+
+            {/* Promoção 2 - PIX */}
+            <Link
+              href="/category/todos"
+              className="group relative flex min-h-[280px] items-end justify-start overflow-hidden rounded-2xl bg-gradient-to-br from-[#2F7A3E] to-[#1d5a2f] p-8 shadow-sm transition-all hover:shadow-lg border border-[#2F7A3E]"
+            >
+              <div className="absolute -bottom-8 -right-8 text-white/10 rotate-12">
+                <Tag className="h-56 w-56" />
+              </div>
+              <div className="relative text-white z-10">
+                <span className="rounded-full bg-white/20 backdrop-blur px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                  Desconto Adicional
+                </span>
+                <h3 className="mt-4 font-serif text-3xl font-bold leading-tight">Pague com PIX</h3>
+                <p className="mt-2 text-green-100 text-sm">+3% de desconto em qualquer compra</p>
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
 

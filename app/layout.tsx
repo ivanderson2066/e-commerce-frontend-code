@@ -7,6 +7,7 @@ import { CartProvider } from '@/lib/cart-context';
 import { AuthProvider } from '@/lib/auth-context';
 import { ShippingProvider } from '@/lib/shipping-context';
 import { FavoritesProvider } from '@/lib/favorites-context';
+import { AddressesProvider } from '@/lib/addresses-context';
 import { Toaster } from '@/components/ui/sonner';
 import Script from 'next/script';
 
@@ -53,12 +54,14 @@ export default function RootLayout({
           <CartProvider>
             <ShippingProvider>
               <FavoritesProvider>
-                <Navbar />
+                <AddressesProvider>
+                  <Navbar />
 
-                <main className="flex-grow w-full relative flex flex-col">{children}</main>
+                  <main className="flex-grow w-full relative flex flex-col">{children}</main>
 
-                <Footer />
-                <Toaster />
+                  <Footer />
+                  <Toaster />
+                </AddressesProvider>
               </FavoritesProvider>
             </ShippingProvider>
           </CartProvider>
