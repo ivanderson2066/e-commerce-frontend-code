@@ -27,11 +27,11 @@ export default function Home() {
         .eq('featured', true)
         .limit(4);
 
-      // Best sellers: order by rating/reviews or by creation date
+      // Best sellers: order by sales_count
       const { data: bestSellersData } = await supabase
         .from('products')
         .select('*')
-        .order('reviews_count', { ascending: false })
+        .order('sales_count', { ascending: false })
         .limit(8);
 
       const { data: categoriesData } = await supabase.from('categories').select('*');
