@@ -29,6 +29,7 @@ export const databaseSchema = {
     sku: "varchar UNIQUE",
     rating: "decimal(3,2)",
     reviews_count: "integer DEFAULT 0",
+    sales_count: "integer DEFAULT 0",
     created_at: "timestamp DEFAULT now()",
     updated_at: "timestamp DEFAULT now()"
   },
