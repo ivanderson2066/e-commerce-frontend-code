@@ -259,10 +259,40 @@ export default function CheckoutPage() {
 
   const handleCopyPix = () => {
     if (orderData?.transactionId) {
-      navigator.clipboard.writeText(orderData.transactionId);
+      // Try modern Clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(orderData.transactionId).then(() => {
+          setPixCopied(true);
+          setTimeout(() => setPixCopied(false), 2000);
+          toast.success("Código PIX copiado!");
+        }).catch(() => {
+          // Fallback to legacy method
+          copyToClipboardLegacy(orderData.transactionId);
+        });
+      } else {
+        // Fallback for non-secure contexts
+        copyToClipboardLegacy(orderData.transactionId);
+      }
+    }
+  };
+
+  const copyToClipboardLegacy = (text: string) => {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand("copy");
       setPixCopied(true);
       setTimeout(() => setPixCopied(false), 2000);
       toast.success("Código PIX copiado!");
+    } catch (err) {
+      toast.error("Não foi possível copiar. Copie manualmente.");
+      console.error("Copy error:", err);
+    } finally {
+      document.body.removeChild(textarea);
     }
   };
 
