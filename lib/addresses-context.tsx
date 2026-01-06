@@ -58,14 +58,19 @@ export function AddressesProvider({ children }: { children: React.ReactNode }) {
         .from('addresses')
         .select('*')
         .eq('user_id', user.id)
-        .order('is_default', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      setAddresses((data as Address[]) || []);
-    } catch (error) {
-      console.error('Error loading addresses:', error);
+      // Sort by is_default in memory if available
+      const sorted = data ? [...data].sort((a: any, b: any) => {
+        if (a.is_default === b.is_default) return 0;
+        return a.is_default ? -1 : 1;
+      }) : [];
+
+      setAddresses((sorted as Address[]) || []);
+    } catch (error: any) {
+      console.error('Error loading addresses:', error?.message || error);
       toast.error('Erro ao carregar endereços');
     } finally {
       setLoading(false);
