@@ -12,7 +12,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from '@/components/ui/breadcrumb';
 
 interface Category {
   id: string;
@@ -54,7 +54,9 @@ export default function CategoriesPage() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/" className="hover:text-[#2F7A3E]">Início</BreadcrumbLink>
+                <BreadcrumbLink href="/" className="hover:text-[#2F7A3E]">
+                  Início
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -121,16 +123,16 @@ export default function CategoriesPage() {
                     )}
 
                     {/* Overlay */}
-                    <div className={`absolute inset-0 ${category.image ? 'bg-black/40' : 'bg-gradient-to-br from-[#2F7A3E]/50 to-[#A7E3B0]/50'} group-hover:bg-black/50 transition-colors`} />
+                    <div
+                      className={`absolute inset-0 ${category.image ? 'bg-black/40' : 'bg-gradient-to-br from-[#2F7A3E]/50 to-[#A7E3B0]/50'} group-hover:bg-black/50 transition-colors`}
+                    />
 
                     {/* Content */}
                     <div className="relative z-10 text-center px-6">
                       <h3 className="text-3xl font-bold font-serif text-white mb-2 group-hover:text-[#A7E3B0] transition-colors">
                         {category.name}
                       </h3>
-                      <p className="text-white/90 text-sm font-medium">
-                        Explorar
-                      </p>
+                      <p className="text-white/90 text-sm font-medium">Explorar</p>
                     </div>
                   </Link>
                 ))}

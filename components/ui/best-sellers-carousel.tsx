@@ -155,9 +155,7 @@ export function BestSellersCarousel({ products, autoScroll = true }: BestSellers
                         {product.rating.toFixed(1)}
                       </span>
                       {product.reviews_count && (
-                        <span className="text-xs text-gray-600">
-                          ({product.reviews_count})
-                        </span>
+                        <span className="text-xs text-gray-600">({product.reviews_count})</span>
                       )}
                     </div>
                   )}
@@ -165,7 +163,11 @@ export function BestSellersCarousel({ products, autoScroll = true }: BestSellers
                   {/* Discount Badge */}
                   {product.original_price && product.original_price > product.price && (
                     <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
-                      -{Math.round(((product.original_price - product.price) / product.original_price) * 100)}%
+                      -
+                      {Math.round(
+                        ((product.original_price - product.price) / product.original_price) * 100
+                      )}
+                      %
                     </div>
                   )}
                 </div>

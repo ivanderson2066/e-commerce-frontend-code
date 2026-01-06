@@ -26,7 +26,9 @@ interface AddressesContextType {
   addresses: Address[];
   defaultAddress: Address | null;
   loading: boolean;
-  addAddress: (address: Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => Promise<Address | null>;
+  addAddress: (
+    address: Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+  ) => Promise<Address | null>;
   updateAddress: (id: string, address: Partial<Address>) => Promise<Address | null>;
   deleteAddress: (id: string) => Promise<boolean>;
   setDefaultAddress: (id: string) => Promise<boolean>;
@@ -63,10 +65,12 @@ export function AddressesProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
 
       // Sort by is_default in memory if available
-      const sorted = data ? [...data].sort((a: any, b: any) => {
-        if (a.is_default === b.is_default) return 0;
-        return a.is_default ? -1 : 1;
-      }) : [];
+      const sorted = data
+        ? [...data].sort((a: any, b: any) => {
+            if (a.is_default === b.is_default) return 0;
+            return a.is_default ? -1 : 1;
+          })
+        : [];
 
       setAddresses((sorted as Address[]) || []);
     } catch (error: any) {
@@ -77,7 +81,9 @@ export function AddressesProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addAddress = async (address: Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+  const addAddress = async (
+    address: Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+  ) => {
     if (!user?.id) {
       toast.error('Faça login para adicionar endereços');
       return null;

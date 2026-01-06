@@ -217,7 +217,9 @@ export default function Home() {
                 <span className="rounded-full bg-white/20 backdrop-blur px-3 py-1 text-xs font-bold uppercase tracking-wider">
                   15% OFF
                 </span>
-                <h3 className="mt-4 font-serif text-3xl font-bold leading-tight">Kit Skincare Completo</h3>
+                <h3 className="mt-4 font-serif text-3xl font-bold leading-tight">
+                  Kit Skincare Completo
+                </h3>
                 <p className="mt-2 text-green-50 text-sm">
                   Cuide da sua pele com ingredientes 100% naturais
                 </p>
@@ -237,9 +239,7 @@ export default function Home() {
                   Desconto Adicional
                 </span>
                 <h3 className="mt-4 font-serif text-3xl font-bold leading-tight">Pague com PIX</h3>
-                <p className="mt-2 text-green-100 text-sm">
-                  +3% de desconto em qualquer compra
-                </p>
+                <p className="mt-2 text-green-100 text-sm">+3% de desconto em qualquer compra</p>
               </div>
             </Link>
           </div>
