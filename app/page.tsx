@@ -13,6 +13,7 @@ import { Loader2, Leaf, Heart, Recycle, Star, Tag, TrendingUp } from 'lucide-rea
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const [bestSellers, setBestSellers] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,9 +27,17 @@ export default function Home() {
         .eq('featured', true)
         .limit(4);
 
+      // Best sellers: order by rating/reviews or by creation date
+      const { data: bestSellersData } = await supabase
+        .from('products')
+        .select('*')
+        .order('reviews_count', { ascending: false })
+        .limit(8);
+
       const { data: categoriesData } = await supabase.from('categories').select('*');
 
       if (productsData) setFeaturedProducts(productsData);
+      if (bestSellersData) setBestSellers(bestSellersData);
       if (categoriesData) setCategories(categoriesData);
 
       setLoading(false);
