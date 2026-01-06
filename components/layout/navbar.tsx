@@ -22,7 +22,7 @@ import { supabase } from '@/lib/supabase-client';
 export function Navbar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, logout, isAdmin } = useAuth(); // <--- Usando isAdmin do Contexto
+  const { user, logout, isAdmin } = useAuth();
   const { totalItems } = useCart();
 
   const [categories, setCategories] = useState<any[]>([]);
@@ -49,8 +49,6 @@ export function Navbar() {
     fetchCategories();
   }, []);
 
-  // LÓGICA DE OCULTAÇÃO ATUALIZADA
-  // Oculta no login, registro E em todas as rotas administrativas
   if (
     pathname === '/login' ||
     pathname === '/register' ||
@@ -105,7 +103,6 @@ export function Navbar() {
 
           {user ? (
             <div className="flex items-center gap-2">
-              {/* BOTAO ADMIN DESKTOP */}
               {isAdmin && (
                 <Link
                   href="/admin"
@@ -150,8 +147,9 @@ export function Navbar() {
 
       <div className="w-full border-t border-gray-200/80 hidden md:block bg-white/50 backdrop-blur-sm overflow-hidden">
         <nav className="mx-auto flex max-w-7xl items-center justify-center gap-8 px-4 py-3 sm:px-6 lg:px-8 overflow-x-auto no-scrollbar">
+          {/* LINK AJUSTADO AQUI - DE /category/todos PARA /category */}
           <Link
-            href="/category/todos"
+            href="/category" 
             className="text-sm font-medium text-gray-600 transition-colors hover:text-[#2F7A3E] hover:font-bold whitespace-nowrap"
           >
             Todas as Categorias
@@ -176,8 +174,9 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="lg:hidden bg-white border-t border-gray-100 p-4 flex flex-col gap-4 absolute top-full w-full shadow-lg z-50 animate-in slide-in-from-top-5 max-h-[80vh] overflow-y-auto left-0 right-0">
           <nav className="flex flex-col gap-3">
+            {/* LINK AJUSTADO AQUI TAMBÉM - DE /category/todos PARA /category */}
             <Link
-              href="/category/todos"
+              href="/category"
               className="text-base font-medium text-gray-700 py-2 border-b border-gray-50 hover:text-[#2F7A3E]"
               onClick={() => setIsMenuOpen(false)}
             >
@@ -235,7 +234,6 @@ export function Navbar() {
             <div className="border-t border-gray-50 my-1"></div>
             {user ? (
               <>
-                {/* BOTAO ADMIN MOBILE */}
                 {isAdmin && (
                   <Link
                     href="/admin"

@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, Package, Edit, Trash } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, Package, Edit, Trash, Star } from 'lucide-react';
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-client";
 import { toast } from "sonner";
@@ -159,6 +159,15 @@ export default function AdminProductsPage() {
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#e9ede2] text-[#556B2F]">
                                             {product.category || 'Geral'}
                                         </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-center">
+                                        {product.featured ? (
+                                            <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100">
+                                                <Star className="w-4 h-4 text-yellow-600 fill-yellow-600" />
+                                            </div>
+                                        ) : (
+                                            <span className="text-gray-300">-</span>
+                                        )}
                                     </td>
                                     <td className="px-4 py-3 w-28">
                                         <div className="flex items-center justify-end gap-2">

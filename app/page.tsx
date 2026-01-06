@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { ProductCard } from '@/components/ui/product-card';
 import { CategoryCarousel } from '@/components/ui/category-carousel';
 import { FeaturedCarousel } from '@/components/ui/featured-carousel';
+import { PromotionsBanner } from '@/components/ui/promotions-banner';
 import { BestSellersCarousel } from '@/components/ui/best-sellers-carousel';
 import { supabase } from '@/lib/supabase-client';
 // Importando ícones Lucide
@@ -74,6 +75,9 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* Promotions Section */}
+      <PromotionsBanner />
 
       {/* Ícones de Confiança */}
       <section className="bg-white py-12 border-b border-gray-100">

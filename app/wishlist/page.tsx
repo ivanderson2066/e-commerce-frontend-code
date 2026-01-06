@@ -16,8 +16,16 @@ interface WishlistItem {
 }
 
 export default function WishlistPage() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.push('/account/favorites');
+    }
+  }, [user, isLoading, router]);
 
   useEffect(() => {
     setMounted(true);

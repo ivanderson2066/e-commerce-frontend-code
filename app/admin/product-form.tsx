@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import {
   Form,
   FormControl,
@@ -119,6 +120,7 @@ const productSchema = z.object({
   height: z.coerce.number().min(1, 'Mínimo 1cm'),
   length: z.coerce.number().min(1, 'Mínimo 1cm'),
   sales_count: z.coerce.number().min(0, 'Vendas não pode ser negativo').optional(),
+  featured: z.boolean().default(false).optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -205,7 +207,7 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
         category: data.category,
         category_id: selectedCategory?.id,
         images: finalImageUrls,
-        featured: false,
+        featured: data.featured,
         weight: data.weight,
         width: data.width,
         height: data.height,
@@ -468,6 +470,27 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
                   />
                 </FormControl>
                 <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="featured"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Destaque</FormLabel>
+                  <FormDescription>
+                    Exibir este produto na seção de destaques da home page.
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
               </FormItem>
             )}
           />
