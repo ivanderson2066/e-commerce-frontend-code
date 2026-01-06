@@ -309,14 +309,34 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
                     <FormItem>
                     <FormLabel>Estoque</FormLabel>
                     <FormControl>
-                        <IntegerInput 
-                            disabled={loading} 
-                            value={field.value} 
-                            onChange={field.onChange} 
+                        <IntegerInput
+                            disabled={loading}
+                            value={field.value}
+                            onChange={field.onChange}
                             placeholder="0"
                         />
                     </FormControl>
                     <FormDescription>Qtd. disponível.</FormDescription>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+
+                <FormField
+                control={form.control}
+                name="sales_count"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Vendas Registradas</FormLabel>
+                    <FormControl>
+                        <IntegerInput
+                            disabled={loading}
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="0"
+                        />
+                    </FormControl>
+                    <FormDescription>Qtd. de vendas (para ranking de campeões).</FormDescription>
                     <FormMessage />
                     </FormItem>
                 )}
