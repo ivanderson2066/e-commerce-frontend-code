@@ -93,10 +93,13 @@ export default function Home() {
       {/* Produtos em Destaque */}
       <section className="py-16 sm:py-24 bg-[#F7FAF7]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="font-serif text-3xl font-bold leading-tight tracking-[-0.015em] sm:text-4xl text-[#374151]">
-              Produtos em Destaque
-            </h2>
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="font-serif text-3xl font-bold leading-tight tracking-[-0.015em] sm:text-4xl text-[#374151]">
+                Destaques Especiais
+              </h2>
+              <p className="text-gray-600 mt-2">Conheça nossos produtos mais procurados</p>
+            </div>
             <Link
               href="/category/todos"
               className="hidden sm:flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-[#2F7A3E] bg-transparent px-6 py-2 text-sm font-bold leading-normal text-[#2F7A3E] shadow-sm transition-colors hover:bg-[#2F7A3E]/10"
@@ -112,16 +115,7 @@ export default function Home() {
           ) : (
             <>
               {/* Featured Carousel with Auto-scroll */}
-              <div className="mb-12">
-                <FeaturedCarousel products={featuredProducts} />
-              </div>
-
-              {/* Featured Products Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8 lg:gap-x-6 lg:gap-y-10">
-                {featuredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              <FeaturedCarousel products={featuredProducts} />
             </>
           )}
 
