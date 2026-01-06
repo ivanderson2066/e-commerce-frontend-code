@@ -6,9 +6,10 @@ import { useState, useEffect } from 'react';
 import { ProductCard } from '@/components/ui/product-card';
 import { CategoryCarousel } from '@/components/ui/category-carousel';
 import { FeaturedCarousel } from '@/components/ui/featured-carousel';
+import { BestSellersCarousel } from '@/components/ui/best-sellers-carousel';
 import { supabase } from '@/lib/supabase-client';
 // Importando ícones Lucide
-import { Loader2, Leaf, Heart, Recycle, Star, Tag } from 'lucide-react';
+import { Loader2, Leaf, Heart, Recycle, Star, Tag, TrendingUp } from 'lucide-react';
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
