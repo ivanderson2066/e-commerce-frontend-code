@@ -158,6 +158,50 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Campeões de Vendas */}
+      <section className="py-16 sm:py-24 bg-white border-b border-gray-100">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <TrendingUp className="h-6 w-6 text-[#2F7A3E]" />
+                <h2 className="font-serif text-3xl font-bold leading-tight tracking-[-0.015em] sm:text-4xl text-[#374151]">
+                  Campeões de Vendas
+                </h2>
+              </div>
+              <p className="text-gray-600">Os produtos mais amados pelos nossos clientes</p>
+            </div>
+            <Link
+              href="/category/todos"
+              className="hidden sm:flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-[#2F7A3E] bg-transparent px-6 py-2 text-sm font-bold leading-normal text-[#2F7A3E] shadow-sm transition-colors hover:bg-[#2F7A3E]/10"
+            >
+              <span className="truncate">Ver Mais</span>
+            </Link>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="h-10 w-10 animate-spin text-[#2F7A3E]" />
+            </div>
+          ) : bestSellers.length > 0 ? (
+            <BestSellersCarousel products={bestSellers} />
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500">Produtos não disponíveis no momento.</p>
+            </div>
+          )}
+
+          <div className="mt-8 text-center sm:hidden">
+            <Link
+              href="/category/todos"
+              className="flex w-full min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-[#2F7A3E] bg-transparent px-8 py-3 text-base font-bold leading-normal text-[#2F7A3E] shadow-sm transition-colors hover:bg-[#2F7A3E]/10"
+            >
+              <span className="truncate">Ver todos os campeões</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Promoções e Benefícios */}
       <section className="py-16 sm:py-24 bg-gradient-to-b from-white to-[#2F7A3E]/5">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
