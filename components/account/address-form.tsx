@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useAddresses, Address } from '@/lib/addresses-context';
-import { X, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface AddressFormProps {
   editingAddress?: Address | null;
@@ -19,18 +20,18 @@ export function AddressForm({ editingAddress, onClose }: AddressFormProps) {
   const { addAddress, updateAddress } = useAddresses();
   const [loading, setLoading] = useState(false);
   
-  // Estado inicial alinhado com o banco de dados
+  // Estado inicial
   const [formData, setFormData] = useState({
-    label: editingAddress?.label || '',       // Ex: "Casa" (antigo 'name' no seu form)
-    name: editingAddress?.name || '',         // Novo: Nome do Destinatário (quem recebe)
-    address: editingAddress?.address || '',   // Ex: Rua (antigo 'street')
+    label: editingAddress?.label || '',
+    name: editingAddress?.name || '',
+    address: editingAddress?.address || '',
     number: editingAddress?.number || '',
     complement: editingAddress?.complement || '',
-    neighborhood: editingAddress?.neighborhood || '', // Novo: Obrigatório no banco
+    neighborhood: editingAddress?.neighborhood || '',
     city: editingAddress?.city || '',
     state: editingAddress?.state || '',
-    zip_code: editingAddress?.zip_code || '', // Antigo 'cep'
-    phone: editingAddress?.phone || '',       // Novo: Obrigatório no banco
+    zip_code: editingAddress?.zip_code || '',
+    phone: editingAddress?.phone || '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -62,36 +63,36 @@ export function AddressForm({ editingAddress, onClose }: AddressFormProps) {
   };
 
   const validateForm = () => {
-    if (!formData.label.trim()) {
-      alert('Por favor, dê um nome para este endereço (ex: Casa)');
-      return false;
-    }
+    const cepLength = formData.zip_code.replace(/\D/g, '').length;
+
     if (!formData.name.trim()) {
-        alert('Por favor, informe o nome de quem receberá a entrega');
+        toast.error('Por favor, informe o nome de quem receberá a entrega');
         return false;
     }
+    
+    if (cepLength !== 8) {
+      toast.error('Por favor, preencha o CEP corretamente (8 dígitos)');
+      return false;
+    }
+
     if (!formData.address.trim()) {
-      alert('Por favor, preencha o campo Rua');
+      toast.error('Por favor, preencha o campo Rua');
       return false;
     }
     if (!formData.number.trim()) {
-      alert('Por favor, preencha o número');
+      toast.error('Por favor, preencha o número');
       return false;
     }
     if (!formData.neighborhood.trim()) {
-        alert('Por favor, preencha o bairro');
+        toast.error('Por favor, preencha o bairro');
         return false;
     }
     if (!formData.city.trim()) {
-      alert('Por favor, preencha a cidade');
+      toast.error('Por favor, preencha a cidade');
       return false;
     }
     if (!formData.state) {
-      alert('Por favor, selecione o estado');
-      return false;
-    }
-    if (formData.zip_code.replace(/\D/g, '').length !== 8) {
-      alert('Por favor, preencha o CEP corretamente (8 dígitos)');
+      toast.error('Por favor, selecione o estado');
       return false;
     }
     return true;
@@ -105,9 +106,8 @@ export function AddressForm({ editingAddress, onClose }: AddressFormProps) {
     setLoading(true);
 
     try {
-      // Objeto preparado para o banco de dados
       const payload = {
-        label: formData.label,
+        label: formData.label || 'Casa', // Default label if empty
         name: formData.name,
         address: formData.address,
         number: formData.number,
@@ -117,7 +117,7 @@ export function AddressForm({ editingAddress, onClose }: AddressFormProps) {
         state: formData.state,
         zip_code: formData.zip_code,
         phone: formData.phone,
-        is_primary: false, // Default
+        is_primary: false, 
       };
 
       if (editingAddress) {
@@ -128,213 +128,221 @@ export function AddressForm({ editingAddress, onClose }: AddressFormProps) {
       onClose();
     } catch (error) {
       console.error('Error saving address:', error);
-      alert('Erro ao salvar endereço. Verifique o console.');
+      toast.error('Erro ao salvar endereço. Tente novamente.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="font-serif text-2xl font-bold text-[#374151]">
-            {editingAddress ? 'Editar Endereço' : 'Novo Endereço'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="h-6 w-6 text-gray-600" />
-          </button>
+    // FIX: Fullscreen overlay with solid background to prevent double scrollbar and transparency issues
+    // Added animate-in matching other pages
+    <div className="fixed inset-0 z-50 bg-[#EBF0EB] dark:bg-[#102214] overflow-y-auto animate-in slide-in-from-bottom-4 duration-300">
+      <div className="min-h-screen w-full flex flex-col p-6 md:p-10">
+        <div className="flex flex-col max-w-4xl mx-auto w-full gap-8 pb-10">
+            
+            {/* Header */}
+            <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-[#3E5D3E] mb-2">
+                    <button 
+                        onClick={onClose} 
+                        className="hover:underline flex items-center gap-1 text-sm font-medium transition-colors cursor-pointer"
+                        type="button"
+                    >
+                        <span className="material-symbols-outlined text-lg font-normal">arrow_back</span>
+                        Voltar para Endereços
+                    </button>
+                </div>
+                <h1 className="text-[#333333] dark:text-[#E0E0E0] text-4xl font-serif font-bold">
+                    {editingAddress ? 'Editar Endereço' : 'Novo Endereço'}
+                </h1>
+                <p className="text-[#333333]/80 dark:text-[#E0E0E0]/80 text-base font-normal leading-normal">
+                    Atualize as informações do seu local de entrega.
+                </p>
+            </div>
+
+            {/* Form Card */}
+            <div className="bg-white dark:bg-[#102214]/50 p-8 rounded-xl border border-[#E0E0E0] dark:border-[#3a4d3a] shadow-sm">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                    
+                    {/* Apelido e Destinatário */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[#333333]/90 dark:text-[#E0E0E0]/90 text-sm font-semibold leading-normal" htmlFor="label">
+                                Apelido do Local (Ex: Casa)
+                            </label>
+                            <input 
+                                className="w-full rounded-lg border border-[#E0E0E0] dark:border-[#3a4d3a] bg-[#F9F9F9]/50 dark:bg-[#102214]/30 text-[#333333] dark:text-[#E0E0E0] focus:border-[#3E5D3E] focus:ring-1 focus:ring-[#3E5D3E] h-12 px-4 outline-none transition-all" 
+                                id="label" 
+                                type="text" 
+                                name="label"
+                                value={formData.label}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[#333333]/90 dark:text-[#E0E0E0]/90 text-sm font-semibold leading-normal" htmlFor="recipient">
+                                Nome do Destinatário
+                            </label>
+                            <input 
+                                className="w-full rounded-lg border border-[#E0E0E0] dark:border-[#3a4d3a] bg-[#F9F9F9]/50 dark:bg-[#102214]/30 text-[#333333] dark:text-[#E0E0E0] focus:border-[#3E5D3E] focus:ring-1 focus:ring-[#3E5D3E] h-12 px-4 outline-none transition-all" 
+                                id="recipient" 
+                                type="text" 
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                            />
+                        </div>
+                    </div>
+
+                    {/* CEP e Rua */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[#333333]/90 dark:text-[#E0E0E0]/90 text-sm font-semibold leading-normal" htmlFor="cep">
+                                CEP
+                            </label>
+                            <input 
+                                className="w-full rounded-lg border border-[#E0E0E0] dark:border-[#3a4d3a] bg-[#F9F9F9]/50 dark:bg-[#102214]/30 text-[#333333] dark:text-[#E0E0E0] focus:border-[#3E5D3E] focus:ring-1 focus:ring-[#3E5D3E] h-12 px-4 outline-none transition-all" 
+                                id="cep" 
+                                type="text" 
+                                name="zip_code"
+                                value={formData.zip_code}
+                                onChange={handleCEPChange}
+                                maxLength={9}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2 md:col-span-2">
+                            <label className="text-[#333333]/90 dark:text-[#E0E0E0]/90 text-sm font-semibold leading-normal" htmlFor="street">
+                                Rua
+                            </label>
+                            <input 
+                                className="w-full rounded-lg border border-[#E0E0E0] dark:border-[#3a4d3a] bg-[#F9F9F9]/50 dark:bg-[#102214]/30 text-[#333333] dark:text-[#E0E0E0] focus:border-[#3E5D3E] focus:ring-1 focus:ring-[#3E5D3E] h-12 px-4 outline-none transition-all" 
+                                id="street" 
+                                type="text" 
+                                name="address"
+                                value={formData.address}
+                                onChange={handleChange}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Número e Complemento */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[#333333]/90 dark:text-[#E0E0E0]/90 text-sm font-semibold leading-normal" htmlFor="number">
+                                Número
+                            </label>
+                            <input 
+                                className="w-full rounded-lg border border-[#E0E0E0] dark:border-[#3a4d3a] bg-[#F9F9F9]/50 dark:bg-[#102214]/30 text-[#333333] dark:text-[#E0E0E0] focus:border-[#3E5D3E] focus:ring-1 focus:ring-[#3E5D3E] h-12 px-4 outline-none transition-all" 
+                                id="number" 
+                                type="text" 
+                                name="number"
+                                value={formData.number}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2 md:col-span-2">
+                            <label className="text-[#333333]/90 dark:text-[#E0E0E0]/90 text-sm font-semibold leading-normal" htmlFor="complement">
+                                Complemento (Opcional)
+                            </label>
+                            <input 
+                                className="w-full rounded-lg border border-[#E0E0E0] dark:border-[#3a4d3a] bg-[#F9F9F9]/50 dark:bg-[#102214]/30 text-[#333333] dark:text-[#E0E0E0] focus:border-[#3E5D3E] focus:ring-1 focus:ring-[#3E5D3E] h-12 px-4 outline-none transition-all" 
+                                id="complement" 
+                                type="text" 
+                                name="complement"
+                                value={formData.complement}
+                                onChange={handleChange}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Bairro, Cidade, Estado */}
+                    <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+                        <div className="flex flex-col gap-2 md:col-span-2">
+                            <label className="text-[#333333]/90 dark:text-[#E0E0E0]/90 text-sm font-semibold leading-normal" htmlFor="neighborhood">
+                                Bairro
+                            </label>
+                            <input 
+                                className="w-full rounded-lg border border-[#E0E0E0] dark:border-[#3a4d3a] bg-[#F9F9F9]/50 dark:bg-[#102214]/30 text-[#333333] dark:text-[#E0E0E0] focus:border-[#3E5D3E] focus:ring-1 focus:ring-[#3E5D3E] h-12 px-4 outline-none transition-all" 
+                                id="neighborhood" 
+                                type="text" 
+                                name="neighborhood"
+                                value={formData.neighborhood}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2 md:col-span-3">
+                            <label className="text-[#333333]/90 dark:text-[#E0E0E0]/90 text-sm font-semibold leading-normal" htmlFor="city">
+                                Cidade
+                            </label>
+                            <input 
+                                className="w-full rounded-lg border border-[#E0E0E0] dark:border-[#3a4d3a] bg-[#F9F9F9]/50 dark:bg-[#102214]/30 text-[#333333] dark:text-[#E0E0E0] focus:border-[#3E5D3E] focus:ring-1 focus:ring-[#3E5D3E] h-12 px-4 outline-none transition-all" 
+                                id="city" 
+                                type="text" 
+                                name="city"
+                                value={formData.city}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2 md:col-span-1">
+                            <label className="text-[#333333]/90 dark:text-[#E0E0E0]/90 text-sm font-semibold leading-normal" htmlFor="state">
+                                Estado
+                            </label>
+                            <select 
+                                className="w-full rounded-lg border border-[#E0E0E0] dark:border-[#3a4d3a] bg-[#F9F9F9]/50 dark:bg-[#102214]/30 text-[#333333] dark:text-[#E0E0E0] focus:border-[#3E5D3E] focus:ring-1 focus:ring-[#3E5D3E] h-12 px-4 outline-none cursor-pointer transition-all" 
+                                id="state"
+                                name="state"
+                                value={formData.state}
+                                onChange={handleChange}
+                            >
+                                <option value="">UF</option>
+                                {BRAZILIAN_STATES.map((state) => (
+                                    <option key={state} value={state}>{state}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Telefone */}
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[#333333]/90 dark:text-[#E0E0E0]/90 text-sm font-semibold leading-normal" htmlFor="phone">
+                            Telefone
+                        </label>
+                        <input 
+                            className="w-full rounded-lg border border-[#E0E0E0] dark:border-[#3a4d3a] bg-[#F9F9F9]/50 dark:bg-[#102214]/30 text-[#333333] dark:text-[#E0E0E0] focus:border-[#3E5D3E] focus:ring-1 focus:ring-[#3E5D3E] h-12 px-4 outline-none transition-all" 
+                            id="phone" 
+                            type="text" 
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handlePhoneChange}
+                            maxLength={15}
+                        />
+                    </div>
+
+                    {/* Botões */}
+                    <div className="flex items-center justify-end gap-4 pt-6 border-t border-[#E0E0E0] dark:border-[#3a4d3a] mt-2">
+                        <button 
+                            type="button"
+                            onClick={onClose}
+                            className="px-6 py-3 rounded-lg border border-[#E0E0E0] text-[#333333] dark:text-[#E0E0E0] dark:border-[#3a4d3a] font-medium hover:bg-white dark:hover:bg-white/5 transition-colors h-12"
+                        >
+                            Cancelar
+                        </button>
+                        <button 
+                            type="submit"
+                            disabled={loading}
+                            className="flex items-center justify-center gap-2 rounded-lg bg-[#3E5D3E] px-8 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-[#3E5D3E]/90 focus:outline-none focus:ring-2 focus:ring-[#3E5D3E] focus:ring-offset-2 h-12 disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
+                            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Salvar Alterações'}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Label (Apelido do Endereço) */}
-            <div>
-                <label className="block text-sm font-medium text-[#374151] mb-2">
-                Apelido do Local *
-                </label>
-                <input
-                type="text"
-                name="label"
-                value={formData.label}
-                onChange={handleChange}
-                placeholder="Ex: Minha Casa, Trabalho"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-[#2F7A3E] focus:ring-1 focus:ring-[#2F7A3E]"
-                />
-            </div>
-
-            {/* Nome do Destinatário */}
-            <div>
-                <label className="block text-sm font-medium text-[#374151] mb-2">
-                Nome do Destinatário *
-                </label>
-                <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Quem vai receber?"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-[#2F7A3E] focus:ring-1 focus:ring-[#2F7A3E]"
-                />
-            </div>
-          </div>
-
-          {/* CEP & Phone */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-                <label className="block text-sm font-medium text-[#374151] mb-2">
-                CEP *
-                </label>
-                <input
-                type="text"
-                name="zip_code"
-                value={formData.zip_code}
-                onChange={handleCEPChange}
-                placeholder="00000-000"
-                maxLength={9}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-[#2F7A3E] focus:ring-1 focus:ring-[#2F7A3E]"
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-[#374151] mb-2">
-                Telefone de Contato *
-                </label>
-                <input
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handlePhoneChange}
-                placeholder="(00) 00000-0000"
-                maxLength={15}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-[#2F7A3E] focus:ring-1 focus:ring-[#2F7A3E]"
-                />
-            </div>
-          </div>
-
-          {/* Address (Rua) */}
-          <div>
-            <label className="block text-sm font-medium text-[#374151] mb-2">
-              Rua/Avenida *
-            </label>
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="Ex: Rua das Flores"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-[#2F7A3E] focus:ring-1 focus:ring-[#2F7A3E]"
-            />
-          </div>
-
-          {/* Number and Complement */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-[#374151] mb-2">
-                Número *
-              </label>
-              <input
-                type="text"
-                name="number"
-                value={formData.number}
-                onChange={handleChange}
-                placeholder="123"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-[#2F7A3E] focus:ring-1 focus:ring-[#2F7A3E]"
-              />
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-[#374151] mb-2">
-                Complemento
-              </label>
-              <input
-                type="text"
-                name="complement"
-                value={formData.complement}
-                onChange={handleChange}
-                placeholder="Apto, sala, etc (opcional)"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-[#2F7A3E] focus:ring-1 focus:ring-[#2F7A3E]"
-              />
-            </div>
-          </div>
-
-          {/* Neighborhood (Bairro) */}
-          <div>
-            <label className="block text-sm font-medium text-[#374151] mb-2">
-              Bairro *
-            </label>
-            <input
-              type="text"
-              name="neighborhood"
-              value={formData.neighborhood}
-              onChange={handleChange}
-              placeholder="Ex: Centro"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-[#2F7A3E] focus:ring-1 focus:ring-[#2F7A3E]"
-            />
-          </div>
-
-          {/* City and State */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-[#374151] mb-2">
-                Cidade *
-              </label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                placeholder="São Paulo"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-[#2F7A3E] focus:ring-1 focus:ring-[#2F7A3E]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[#374151] mb-2">
-                Estado *
-              </label>
-              <select
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-[#2F7A3E] focus:ring-1 focus:ring-[#2F7A3E]"
-              >
-                <option value="">UF</option>
-                {BRAZILIAN_STATES.map((state) => (
-                  <option key={state} value={state}>
-                    {state}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex gap-3 pt-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 bg-[#2F7A3E] hover:bg-[#266332] disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-bold transition-all"
-            >
-              {loading && <Loader2 className="h-5 w-5 animate-spin" />}
-              {editingAddress ? 'Atualizar Endereço' : 'Adicionar Endereço'}
-            </button>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 px-6 py-3 rounded-lg font-bold transition-colors"
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
       </div>
+      
+      {/* Import Material Symbols for the arrow icon - only needed if not already in layout */}
+      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     </div>
   );
 }

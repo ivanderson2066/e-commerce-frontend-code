@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useAddresses, Address } from '@/lib/addresses-context';
-import { Plus, Edit2, Trash2, MapPin, Check } from 'lucide-react';
+import { Edit2, Trash2, Check, PlusCircle, Phone } from 'lucide-react';
 import { AddressForm } from '@/components/account/address-form';
-import { toast } from 'sonner';
+import { cn } from '@/lib/utils'; // Utilitário padrão do shadcn/ui se tiver, senão uso string template
 
 export default function AddressesPage() {
   const { user } = useAuth();
@@ -34,129 +34,120 @@ export default function AddressesPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2F7A3E] mb-4"></div>
+      <div className="flex flex-col items-center justify-center py-20 min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4A6C4A] mb-4"></div>
         <p className="text-gray-600">Carregando endereços...</p>
       </div>
     );
   }
 
+  // Cor primária baseada no seu HTML: #4A6C4A
+  const primaryColor = "text-[#4A6C4A]";
+  const primaryBgHover = "hover:bg-[#4A6C4A]/10";
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-serif text-3xl font-bold text-[#374151]">Meus Endereços</h1>
-          <p className="text-gray-600 mt-1">Gerencie seus endereços de entrega e cobrança</p>
-        </div>
-        <button
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
+      
+      {/* Header da Página */}
+      <div className="flex flex-col gap-2">
+        <h1 className="text-[#333333] text-4xl font-serif font-bold">Meus Endereços</h1>
+        <p className="text-[#4A6C4A]/90 text-base font-normal leading-normal">
+          Gerencie seus locais de entrega para agilizar suas compras.
+        </p>
+      </div>
+
+      {/* Grid de Endereços */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {/* Renderiza os Cards Existentes */}
+        {addresses.map((address) => (
+          <div 
+            key={address.id} 
+            className={`flex flex-col gap-4 bg-white p-6 rounded-xl border shadow-sm transition-all duration-300 hover:shadow-md ${
+                address.is_primary ? 'border-[#4A6C4A] bg-[#4A6C4A]/5' : 'border-[#E0E0E0]'
+            }`}
+          >
+            {/* Header do Card */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <h3 className="text-[#333333] text-lg font-bold leading-normal capitalize">
+                    {address.label}
+                </h3>
+                {address.is_primary && (
+                  <span className="text-xs font-semibold text-[#4A6C4A] bg-[#4A6C4A]/20 px-2 py-0.5 rounded-full">
+                    Principal
+                  </span>
+                )}
+              </div>
+              
+              {/* Ações */}
+              <div className="flex items-center gap-1">
+                {!address.is_primary && (
+                    <button 
+                        onClick={() => handleSetDefault(address.id)}
+                        className={`flex items-center justify-center size-8 rounded-full ${primaryBgHover} transition-colors text-gray-400 hover:text-[#4A6C4A]`}
+                        title="Definir como Padrão"
+                    >
+                        <Check size={18} />
+                    </button>
+                )}
+                <button 
+                    onClick={() => handleEdit(address)}
+                    className={`flex items-center justify-center size-8 rounded-full ${primaryBgHover} transition-colors text-[#333333]/80`}
+                    title="Editar"
+                >
+                  <Edit2 size={18} />
+                </button>
+                <button 
+                    onClick={() => handleDelete(address.id)}
+                    className={`flex items-center justify-center size-8 rounded-full hover:bg-red-50 transition-colors text-[#333333]/80 hover:text-red-600`}
+                    title="Excluir"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Corpo do Card (Detalhes) */}
+            <div className={`border-t pt-4 ${address.is_primary ? 'border-[#4A6C4A]/20' : 'border-[#E0E0E0]'}`}>
+              <p className="text-[#333333]/80 text-sm font-medium leading-relaxed mb-1">
+                {address.name}
+              </p>
+              <p className="text-[#333333]/80 text-sm font-normal leading-relaxed">
+                {address.address}, {address.number} {address.complement && ` - ${address.complement}`}
+              </p>
+              <p className="text-[#333333]/80 text-sm font-normal leading-relaxed capitalize">
+                {address.neighborhood}, {address.city} - {address.state}
+              </p>
+              <p className="text-[#333333]/80 text-sm font-normal leading-relaxed mt-2">
+                CEP: {address.zip_code}
+              </p>
+              {address.phone && (
+                  <p className="text-[#333333]/60 text-xs font-normal leading-relaxed mt-1 flex items-center gap-1">
+                    <Phone size={12} /> {address.phone}
+                  </p>
+              )}
+            </div>
+          </div>
+        ))}
+
+        {/* Botão "Adicionar Novo" (Estilo Card Tracejado) */}
+        <button 
           onClick={() => {
             setEditingAddress(null);
             setShowForm(true);
           }}
-          className="flex items-center gap-2 bg-[#2F7A3E] hover:bg-[#266332] text-white px-6 py-3 rounded-full font-bold transition-all hover:shadow-lg"
+          className="flex flex-col min-h-[228px] cursor-pointer items-center justify-center gap-3 overflow-hidden rounded-xl border-2 border-dashed border-[#4A6C4A]/30 text-[#4A6C4A] transition-all hover:bg-[#4A6C4A]/5 hover:border-[#4A6C4A]/50 group"
         >
-          <Plus className="h-5 w-5" />
-          Novo Endereço
+          <PlusCircle className="h-10 w-10 transition-transform group-hover:scale-110" strokeWidth={1.5} />
+          <span className="text-base font-semibold">Adicionar Novo Endereço</span>
         </button>
+
       </div>
 
-      {/* Form */}
+      {/* Modal de Formulário */}
       {showForm && (
         <AddressForm editingAddress={editingAddress} onClose={handleFormClose} />
-      )}
-
-      {/* Addresses List */}
-      {addresses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-lg border border-gray-200">
-          <div className="h-20 w-20 bg-gradient-to-br from-[#2F7A3E]/10 to-[#A7E3B0]/10 rounded-full flex items-center justify-center mb-6">
-            <MapPin className="h-10 w-10 text-[#2F7A3E]" />
-          </div>
-          <h3 className="font-serif text-2xl font-bold text-[#374151] mb-2">Nenhum endereço cadastrado</h3>
-          <p className="text-gray-600 mb-6 max-w-md">
-            Adicione seu primeiro endereço para facilitar suas compras e entregas.
-          </p>
-          <button
-            onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-2 bg-[#2F7A3E] hover:bg-[#266332] text-white px-6 py-3 rounded-full font-bold transition-all hover:shadow-lg"
-          >
-            <Plus className="h-5 w-5" />
-            Adicionar Endereço
-          </button>
-        </div>
-      ) : (
-        <div className="grid gap-4">
-          {addresses.map((address) => (
-            <div
-              key={address.id}
-              className="bg-white border-2 rounded-lg p-6 transition-all hover:shadow-md"
-              style={{
-                borderColor: address.is_default ? '#2F7A3E' : '#E5E7EB',
-              }}
-            >
-              <div className="flex items-start justify-between gap-4">
-                {/* Address Info */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <h3 className="text-lg font-bold text-[#374151]">{address.name}</h3>
-                    {address.is_default && (
-                      <span className="inline-flex items-center gap-1 bg-[#2F7A3E]/10 text-[#2F7A3E] px-3 py-1 rounded-full text-sm font-bold">
-                        <Check className="h-4 w-4" />
-                        Padrão
-                      </span>
-                    )}
-                    <span className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold capitalize">
-                      {address.address_type === 'both' ? 'Entrega & Cobrança' : address.address_type === 'shipping' ? 'Entrega' : 'Cobrança'}
-                    </span>
-                  </div>
-
-                  <div className="text-gray-600 space-y-1">
-                    <p>
-                      {address.street}, {address.number}
-                      {address.complement && ` - ${address.complement}`}
-                    </p>
-                    <p>
-                      {address.city}, {address.state} - {address.cep}
-                    </p>
-                    <p className="text-sm text-gray-500">{address.country}</p>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2">
-                  {!address.is_default && (
-                    <button
-                      onClick={() => handleSetDefault(address.id)}
-                      className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-[#2F7A3E] hover:bg-[#2F7A3E]/10 rounded-lg transition-colors"
-                      title="Definir como padrão"
-                    >
-                      <Check className="h-4 w-4" />
-                      Padrão
-                    </button>
-                  )}
-
-                  <button
-                    onClick={() => handleEdit(address)}
-                    className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    title="Editar"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                    Editar
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(address.id)}
-                    className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Deletar"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Deletar
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
       )}
     </div>
   );

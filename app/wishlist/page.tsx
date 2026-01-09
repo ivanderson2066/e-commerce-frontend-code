@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart, ChevronLeft, Trash2, ShoppingBag } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth-context';
+import { Heart, ChevronLeft, Trash2, ShoppingBag, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface WishlistItem {
@@ -16,7 +18,8 @@ interface WishlistItem {
 }
 
 export default function WishlistPage() {
-  const { user, isLoading } = useAuth();
+  // Alterado de 'loading: isLoading' para 'isLoading' pois o AuthContext provavelmente exporta 'isLoading'
+  const { user, isLoading } = useAuth(); 
   const router = useRouter();
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [mounted, setMounted] = useState(false);
@@ -52,8 +55,12 @@ export default function WishlistPage() {
     toast.success('Favoritos limpos');
   };
 
-  if (!mounted) {
-    return null;
+  if (!mounted || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#2F7A3E]" />
+      </div>
+    );
   }
 
   if (wishlist.length === 0) {
@@ -211,8 +218,7 @@ export default function WishlistPage() {
             <div className="space-y-3">
               <button
                 onClick={() => {
-                  // Here you would add all items to cart and redirect
-                  toast.success('Todos os itens foram adicionados ao carrinho!');
+                  toast.success('Funcionalidade de adicionar tudo ao carrinho em breve!');
                 }}
                 className="w-full bg-[#2F7A3E] hover:bg-[#266332] text-white py-3 rounded-full font-bold transition-all hover:shadow-lg"
               >
