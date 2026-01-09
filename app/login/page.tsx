@@ -184,10 +184,11 @@ export default function LoginPage() {
                 </label>
             )}
 
+            {/* CORREÇÃO AQUI: Link para /forgot-password */}
             {tab === 'login' && (
-                <a href="#" className="text-sm text-[#3A5A40] hover:underline text-right -mt-2 font-medium">
+                <Link href="/forgot-password" className="text-sm text-[#3A5A40] hover:underline text-right -mt-2 font-medium">
                     Esqueci minha senha
-                </a>
+                </Link>
             )}
 
             <button 

@@ -4,6 +4,7 @@
 
 import { createContext, useContext, useState } from "react";
 import { useCart } from "@/lib/cart-context";
+import { Address } from "./addresses-context";
 
 export interface ShippingOption {
   id: string;
@@ -17,8 +18,10 @@ export interface ShippingOption {
 interface ShippingContextType {
   selectedShipping: ShippingOption | null;
   shippingOptions: ShippingOption[];
+  selectedAddress: Address | null;
   calculateShipping: (cep: string) => Promise<void>;
   selectShipping: (option: ShippingOption) => void;
+  selectAddress: (address: Address | null) => void;
   isLoading: boolean;
   error: string | null;
 }
@@ -28,9 +31,10 @@ const ShippingContext = createContext<ShippingContextType | undefined>(undefined
 export function ShippingProvider({ children }: { children: React.ReactNode }) {
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [selectedAddress, setSelectedAddressState] = useState<Address | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const { items } = useCart();
 
   const calculateShipping = async (cep: string) => {
@@ -91,13 +95,19 @@ export function ShippingProvider({ children }: { children: React.ReactNode }) {
     setSelectedShipping(option);
   };
 
+  const selectAddress = (address: Address | null) => {
+    setSelectedAddressState(address);
+  };
+
   return (
     <ShippingContext.Provider
       value={{
         selectedShipping,
         shippingOptions,
+        selectedAddress,
         calculateShipping,
         selectShipping,
+        selectAddress,
         isLoading,
         error
       }}
