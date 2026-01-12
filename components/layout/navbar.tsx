@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { CartSheet } from '@/components/cart/cart-sheet';
@@ -13,20 +14,39 @@ import {
   LogOut,
   ShoppingBag,
   Search,
-  Leaf,
   LayoutDashboard,
   Heart,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase-client';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useRouter } from 'next/navigation';
 
 export function Navbar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout: signOut, isAdmin } = useAuth();
   const { totalItems } = useCart();
+  const router = useRouter();
 
   const [categories, setCategories] = useState<any[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+
+  const handleLogout = async () => {
+      if (signOut) {
+          await signOut();
+      } else {
+          const { supabase } = await import('@/lib/supabase-client');
+          await supabase.auth.signOut();
+          window.location.reload();
+      }
+  };
 
   useEffect(() => {
     async function fetchCategories() {
@@ -61,23 +81,32 @@ export function Navbar() {
 
   return (
     <header className="relative z-50 flex flex-col whitespace-nowrap bg-[#2F7A3E] shadow-lg w-full max-w-full">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8 w-full">
-        <div className="flex items-center gap-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:py-4 sm:px-6 lg:px-8 w-full">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 lg:hidden"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 lg:hidden flex-shrink-0"
           >
             <Menu className="h-6 w-6" />
           </button>
 
           <Link
             href="/"
-            className="flex items-center gap-2 text-white hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 sm:gap-3 hover:opacity-90 transition-opacity"
           >
-            <Leaf className="h-8 w-8 flex-shrink-0" />
-            <h2 className="font-serif text-xl font-bold tracking-[-0.015em] text-white">
+            <Image
+              src="/nova-logo.png" 
+              alt="Caiçara Mix Logo"
+              width={48} 
+              height={48} 
+              // Ajuste responsivo: h-9 no celular (36px), sm:h-11 no PC (44px)
+              className="h-9 w-auto sm:h-11 object-contain"
+              priority
+            />
+            {/* Ajuste responsivo do texto: text-lg no celular, text-2xl no PC */}
+            <span className="font-serif text-lg sm:text-2xl font-bold text-white tracking-wide leading-none mt-0.5">
               Caiçara Mix
-            </h2>
+            </span>
           </Link>
         </div>
 
@@ -96,9 +125,15 @@ export function Navbar() {
           />
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+        <div className="flex items-center gap-1 sm:gap-4 flex-shrink-0">
           <div className="md:hidden">
-            <SearchModal />
+            <SearchModal 
+                customTrigger={
+                    <button className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-white hover:bg-white/10 transition-colors">
+                        <Search className="h-5 w-5" />
+                    </button>
+                }
+            />
           </div>
 
           {user ? (
@@ -112,30 +147,54 @@ export function Navbar() {
                   ADMIN
                 </Link>
               )}
-              <Link
-                href="/account"
-                className="hidden h-10 cursor-pointer items-center gap-2 rounded-full px-3 text-sm font-medium text-[#374151] transition-colors hover:bg-gray-200/50 sm:flex group"
-              >
-                <User className="h-5 w-5 group-hover:text-[#2F7A3E]" />
-                <span className="hidden lg:block group-hover:text-[#2F7A3E]">Minha Conta</span>
-              </Link>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div
+                    className="hidden h-10 cursor-pointer items-center gap-2 rounded-full px-3 text-sm font-medium text-white transition-colors hover:bg-white/10 sm:flex group"
+                  >
+                    <User className="h-5 w-5" />
+                    <span className="hidden lg:block">Minha Conta</span>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user.user_metadata?.full_name || 'Olá, Cliente'}</p>
+                        <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => router.push('/account')}>
+                        Minha Conta
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/account/orders')}>
+                        Meus Pedidos
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sair
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ) : (
             <Link
               href="/login"
-              className="hidden h-10 cursor-pointer items-center gap-2 rounded-full px-3 text-sm font-medium text-[#374151] transition-colors hover:bg-gray-200/50 sm:flex group"
+              className="hidden h-10 cursor-pointer items-center gap-2 rounded-full px-3 text-sm font-medium text-white transition-colors hover:bg-white/10 sm:flex group"
             >
-              <User className="h-5 w-5 group-hover:text-[#2F7A3E]" />
-              <span className="hidden lg:block group-hover:text-[#2F7A3E]">Entrar</span>
+              <User className="h-5 w-5" />
+              <span className="hidden lg:block">Entrar</span>
             </Link>
           )}
 
           <CartSheet
             customTrigger={
-              <button className="relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-transparent text-[#374151] transition-colors hover:bg-gray-200/50 group">
-                <ShoppingBag className="h-6 w-6 group-hover:text-[#2F7A3E]" />
+              <button className="relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-transparent text-white transition-colors hover:bg-white/10 group">
+                <ShoppingBag className="h-6 w-6" />
                 {totalItems > 0 && (
-                  <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#2F7A3E] text-[10px] font-bold text-white flex items-center justify-center ring-2 ring-[#F7FAF7]">
+                  <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-white text-[10px] font-bold text-[#2F7A3E] flex items-center justify-center">
                     {totalItems}
                   </span>
                 )}
@@ -145,12 +204,11 @@ export function Navbar() {
         </div>
       </div>
 
-      <div className="w-full border-t border-gray-200/80 hidden md:block bg-white/50 backdrop-blur-sm overflow-hidden">
+      <div className="w-full border-t border-white/20 hidden md:block bg-[#2F7A3E] overflow-hidden">
         <nav className="mx-auto flex max-w-7xl items-center justify-center gap-8 px-4 py-3 sm:px-6 lg:px-8 overflow-x-auto no-scrollbar">
-          {/* LINK AJUSTADO AQUI - DE /category/todos PARA /category */}
           <Link
             href="/category" 
-            className="text-sm font-medium text-gray-600 transition-colors hover:text-[#2F7A3E] hover:font-bold whitespace-nowrap"
+            className="text-sm font-medium text-white/90 transition-colors hover:text-white hover:font-bold whitespace-nowrap"
           >
             Todas as Categorias
           </Link>
@@ -159,14 +217,14 @@ export function Navbar() {
             <Link
               key={cat.id}
               href={`/category/${cat.slug}`}
-              className="text-sm font-medium text-gray-600 transition-colors hover:text-[#2F7A3E] hover:font-bold capitalize whitespace-nowrap"
+              className="text-sm font-medium text-white/90 transition-colors hover:text-white hover:font-bold capitalize whitespace-nowrap"
             >
               {cat.name}
             </Link>
           ))}
 
           {loadingCategories && (
-            <span className="text-xs text-gray-400 italic animate-pulse">Carregando...</span>
+            <span className="text-xs text-white/60 italic animate-pulse">Carregando...</span>
           )}
         </nav>
       </div>
@@ -174,7 +232,6 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="lg:hidden bg-white border-t border-gray-100 p-4 flex flex-col gap-4 absolute top-full w-full shadow-lg z-50 animate-in slide-in-from-top-5 max-h-[80vh] overflow-y-auto left-0 right-0">
           <nav className="flex flex-col gap-3">
-            {/* LINK AJUSTADO AQUI TAMBÉM - DE /category/todos PARA /category */}
             <Link
               href="/category"
               className="text-base font-medium text-gray-700 py-2 border-b border-gray-50 hover:text-[#2F7A3E]"
@@ -252,7 +309,7 @@ export function Navbar() {
                 </Link>
                 <button
                   onClick={() => {
-                    logout();
+                    handleLogout();
                     setIsMenuOpen(false);
                   }}
                   className="flex items-center gap-2 text-red-600 font-medium py-2 w-full text-left px-2"
