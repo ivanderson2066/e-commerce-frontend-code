@@ -121,6 +121,8 @@ const productSchema = z.object({
   length: z.coerce.number().min(1, 'Mínimo 1cm'),
   sales_count: z.coerce.number().min(0, 'Vendas não pode ser negativo').optional(),
   featured: z.boolean().default(false).optional(),
+  best_seller: z.boolean().default(false).optional(),
+  on_promotion: z.boolean().default(false).optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -150,6 +152,9 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
           height: initialData.height || 5,
           length: initialData.length || 20,
           sales_count: initialData.sales_count || 0,
+          featured: initialData.featured || false,
+          best_seller: initialData.best_seller || false,
+          on_promotion: initialData.on_promotion || false,
         }
       : {
           name: '',
@@ -163,6 +168,9 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
           height: 5,
           length: 20,
           sales_count: 0,
+          featured: false,
+          best_seller: false,
+          on_promotion: false,
         },
   });
 
@@ -208,6 +216,8 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
         category_id: selectedCategory?.id,
         images: finalImageUrls,
         featured: data.featured,
+        best_seller: data.best_seller,
+        on_promotion: data.on_promotion,
         weight: data.weight,
         width: data.width,
         height: data.height,
@@ -483,6 +493,48 @@ export function ProductForm({ initialData, categories, onSuccess, onCancel }: Pr
                   <FormLabel className="text-base">Destaque</FormLabel>
                   <FormDescription>
                     Exibir este produto na seção de destaques da home page.
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="best_seller"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Campeao de Vendas</FormLabel>
+                  <FormDescription>
+                    Exibir este produto na seção "Campeões de Vendas" da home page.
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="on_promotion"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Em Promocao</FormLabel>
+                  <FormDescription>
+                    Marcar este produto como em promocao (exibido na seção de promoções da home page).
                   </FormDescription>
                 </div>
                 <FormControl>

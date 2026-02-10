@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, Package, Edit, Trash, Star } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, Package, Edit, Trash, Star, TrendingUp, Tag } from 'lucide-react';
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-client";
 import { toast } from "sonner";
@@ -126,14 +126,15 @@ export default function AdminProductsPage() {
                             <th className="px-4 py-3 text-left text-[#666666] text-xs font-medium uppercase tracking-wider">Preço</th>
                             <th className="px-4 py-3 text-left text-[#666666] text-xs font-medium uppercase tracking-wider">Estoque</th>
                             <th className="px-4 py-3 text-left text-[#666666] text-xs font-medium uppercase tracking-wider">Categoria</th>
+                            <th className="px-4 py-3 text-center text-[#666666] text-xs font-medium uppercase tracking-wider">Tags</th>
                             <th className="px-4 py-3 text-left text-[#666666] w-28 text-xs font-medium uppercase tracking-wider text-right">Ações</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E0E0E0]">
                         {loadingData ? (
-                            <tr><td colSpan={5} className="text-center py-10 text-[#666666]">Carregando produtos...</td></tr>
+                            <tr><td colSpan={6} className="text-center py-10 text-[#666666]">Carregando produtos...</td></tr>
                         ) : filteredProducts.length === 0 ? (
-                            <tr><td colSpan={5} className="text-center py-10 text-[#666666]">Nenhum produto encontrado.</td></tr>
+                            <tr><td colSpan={6} className="text-center py-10 text-[#666666]">Nenhum produto encontrado.</td></tr>
                         ) : (
                             currentProducts.map((product) => (
                                 <tr key={product.id} className="hover:bg-[#e9ede2]/50 transition-colors">
@@ -160,14 +161,27 @@ export default function AdminProductsPage() {
                                             {product.category || 'Geral'}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-center">
-                                        {product.featured ? (
-                                            <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100">
-                                                <Star className="w-4 h-4 text-yellow-600 fill-yellow-600" />
-                                            </div>
-                                        ) : (
-                                            <span className="text-gray-300">-</span>
-                                        )}
+                                    <td className="px-4 py-3">
+                                        <div className="flex flex-wrap items-center justify-center gap-1">
+                                            {product.featured && (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700" title="Destaque">
+                                                    <Star className="w-3 h-3 fill-yellow-600" /> Destaque
+                                                </span>
+                                            )}
+                                            {product.best_seller && (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700" title="Campeao de Vendas">
+                                                    <TrendingUp className="w-3 h-3" /> Campeao
+                                                </span>
+                                            )}
+                                            {product.on_promotion && (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700" title="Em Promocao">
+                                                    <Tag className="w-3 h-3" /> Promo
+                                                </span>
+                                            )}
+                                            {!product.featured && !product.best_seller && !product.on_promotion && (
+                                                <span className="text-gray-300">-</span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-4 py-3 w-28">
                                         <div className="flex items-center justify-end gap-2">
