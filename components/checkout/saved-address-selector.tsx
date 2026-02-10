@@ -46,11 +46,11 @@ export function SavedAddressSelector({
       </p>
 
       <div className="space-y-2">
-        {addresses.map((address) => (
+        {addresses.map((addr) => (
           <label
-            key={address.id}
+            key={addr.id}
             className={`flex items-start p-3 border rounded-lg cursor-pointer transition-all ${
-              selectedAddressId === address.id
+              selectedAddressId === addr.id
                 ? 'border-emerald-600 bg-white ring-1 ring-emerald-600'
                 : 'border-emerald-200 bg-white hover:border-emerald-400'
             }`}
@@ -58,21 +58,21 @@ export function SavedAddressSelector({
             <input
               type="radio"
               name="savedAddress"
-              checked={selectedAddressId === address.id}
-              onChange={() => handleSelectAddress(address)}
+              checked={selectedAddressId === addr.id}
+              onChange={() => handleSelectAddress(addr)}
               className="mr-3 mt-0.5 flex-shrink-0"
             />
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-gray-900 text-sm">{address.name}</p>
+              <p className="font-semibold text-gray-900 text-sm">{addr.label || addr.name}</p>
               <p className="text-xs text-gray-600">
-                {address.street}, {address.number}
-                {address.complement && ` - ${address.complement}`}
+                {addr.address}, {addr.number}
+                {addr.complement && ` - ${addr.complement}`}
               </p>
               <p className="text-xs text-gray-500">
-                {address.city}, {address.state} - {address.cep}
+                {addr.neighborhood && `${addr.neighborhood} - `}{addr.city}, {addr.state} - {addr.zip_code}
               </p>
             </div>
-            {address.is_default && (
+            {addr.is_primary && (
               <span className="ml-2 inline-block bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-semibold flex-shrink-0">
                 Padrão
               </span>
