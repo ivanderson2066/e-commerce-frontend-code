@@ -26,6 +26,8 @@ export const databaseSchema = {
     images: 'text[] NOT NULL',
     stock: 'integer DEFAULT 0',
     featured: 'boolean DEFAULT false',
+    best_seller: 'boolean DEFAULT false',
+    on_promotion: 'boolean DEFAULT false',
     sku: 'varchar UNIQUE',
     rating: 'decimal(3,2)',
     reviews_count: 'integer DEFAULT 0',
@@ -113,6 +115,8 @@ export const databaseSchema = {
 export const indexes = [
   'CREATE INDEX idx_products_category ON products(category);',
   'CREATE INDEX idx_products_featured ON products(featured);',
+  'CREATE INDEX idx_products_best_seller ON products(best_seller);',
+  'CREATE INDEX idx_products_on_promotion ON products(on_promotion);',
   'CREATE INDEX idx_orders_user_id ON orders(user_id);',
   'CREATE INDEX idx_orders_status ON orders(status);',
   'CREATE INDEX idx_reviews_product_id ON reviews(product_id);',

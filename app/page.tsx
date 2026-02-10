@@ -15,6 +15,7 @@ import { Loader2, Leaf, Heart, Recycle, Star, Tag, TrendingUp } from 'lucide-rea
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
   const [bestSellers, setBestSellers] = useState<any[]>([]);
+  const [promotionProducts, setPromotionProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,19 +27,28 @@ export default function Home() {
         .from('products')
         .select('*')
         .eq('featured', true)
-        .limit(4);
+        .limit(8);
 
-      // Best sellers: order by sales_count
+      // Best sellers: products marked as best_seller by the admin
       const { data: bestSellersData } = await supabase
         .from('products')
         .select('*')
+        .eq('best_seller', true)
         .order('sales_count', { ascending: false })
+        .limit(8);
+
+      // Promotion products: products marked as on_promotion by the admin
+      const { data: promoData } = await supabase
+        .from('products')
+        .select('*')
+        .eq('on_promotion', true)
         .limit(8);
 
       const { data: categoriesData } = await supabase.from('categories').select('*');
 
       if (productsData) setFeaturedProducts(productsData);
       if (bestSellersData) setBestSellers(bestSellersData);
+      if (promoData) setPromotionProducts(promoData);
       if (categoriesData) setCategories(categoriesData);
 
       setLoading(false);
@@ -77,7 +87,7 @@ export default function Home() {
       </section>
 
       {/* Promotions Section */}
-      <PromotionsBanner />
+      <PromotionsBanner products={promotionProducts} />
 
       {/* Ícones de Confiança */}
       <section className="bg-white py-12 border-b border-gray-100">

@@ -84,18 +84,45 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
-  const handleAddressSelect = (address: Address | null) => {
+  const handleAddressSelect = async (address: Address | null) => {
     setSelectedAddress(address);
     if (address) {
+      const cepValue = address.zip_code || '';
       setFormData((prev) => ({
         ...prev,
-        street: address.street,
+        fullName: address.name || prev.fullName,
+        phone: address.phone || prev.phone,
+        street: address.address,
         number: address.number,
         complement: address.complement || '',
         city: address.city,
         state: address.state,
-        cep: address.cep,
+        cep: cepValue,
       }));
+      // Auto-calculate shipping when selecting a saved address
+      const cleanCep = cepValue.replace(/\D/g, '');
+      if (cleanCep.length === 8) {
+        setError('');
+        setShowShippingOptions(false);
+        try {
+          await calculateShipping(cleanCep);
+          setShowShippingOptions(true);
+        } catch (err) {
+          console.error('Erro ao calcular frete do endereço salvo', err);
+        }
+      }
+    } else {
+      // Reset form when "new address" is selected
+      setFormData((prev) => ({
+        ...prev,
+        street: '',
+        number: '',
+        complement: '',
+        city: '',
+        state: '',
+        cep: '',
+      }));
+      setShowShippingOptions(false);
     }
   };
 
