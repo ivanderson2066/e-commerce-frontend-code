@@ -65,32 +65,29 @@ export default function CategoryPage() {
         setCategoryInfo(catInfo);
 
         // 2. Buscar Produtos
-        let query = supabase.from('products').select('*');
-
         if (slug !== 'todos') {
-            // Lógica de Busca Inteligente:
-            // 1. Tenta bater com a coluna 'category' exata
-            // 2. OU tenta encontrar o termo no nome/descrição do produto (busca textual)
-            // O Supabase free não tem 'OR' complexo fácil entre colunas diferentes sem RPC,
-            // então vamos filtrar no cliente se a busca exata falhar, ou usar 'ilike'
-            
-            // Tenta filtrar pela coluna categoria (que deve guardar o slug ou ID)
-            const { data: exactProducts, error } = await query.ilike('category', `%${slug}%`);
-            
+            // Tenta filtrar pela coluna categoria (que deve guardar o slug ou nome)
+            const { data: exactProducts } = await supabase
+                .from('products')
+                .select('*')
+                .ilike('category', `%${slug}%`);
+
             if (exactProducts && exactProducts.length > 0) {
                 setProducts(exactProducts);
             } else {
-                // Fallback: Se não achou por categoria, busca por nome (ex: busca "lavanda")
+                // Fallback: Se não achou por categoria, busca por nome
                 const { data: textSearchProducts } = await supabase
                     .from('products')
                     .select('*')
                     .ilike('name', `%${slug}%`);
-                
+
                 setProducts(textSearchProducts || []);
             }
         } else {
             // Se for 'todos', pega tudo
-            const { data: allProducts } = await query;
+            const { data: allProducts } = await supabase
+                .from('products')
+                .select('*');
             setProducts(allProducts || []);
         }
 

@@ -5,13 +5,13 @@ import { supabase } from "@/lib/supabase-client";
 import { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 
-// Estendemos o tipo User para incluir role se você estiver usando custom claims
-// ou tabela users separada. Por simplicidade, usaremos o user metadata.
+// Mantendo sua interface User personalizada
 export interface User {
   id: string;
   email?: string;
   name?: string;
   role?: string;
+  user_metadata?: any;
 }
 
 interface AuthContextType {
@@ -19,6 +19,7 @@ interface AuthContextType {
   session: Session | null;
   isLoggedIn: boolean;
   isLoading: boolean;
+  isAdmin: boolean; // Adicionado para suportar a lógica do painel Admin
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -30,20 +31,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false); // Estado necessário para UI de Admin
   const router = useRouter();
+
+  // Função auxiliar para verificar Admin (Lógica mantida para segurança)
+  const checkIsAdmin = (currentUser: SupabaseUser | null) => {
+    if (!currentUser) {
+      setIsAdmin(false);
+      return;
+    }
+    
+    // Verifica metadados (onde injetamos a role via SQL ou via Auth)
+    const appMeta = currentUser.app_metadata || {};
+    const userMeta = currentUser.user_metadata || {};
+
+    // Verifica se é admin em qualquer um dos locais possíveis
+    const hasAdminRole = 
+      appMeta.role === 'admin' || 
+      appMeta.admin === true || 
+      userMeta.role === 'admin';
+    
+    setIsAdmin(hasAdminRole);
+  };
 
   useEffect(() => {
     // Verificar sessão atual
     const fetchSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
+      
       if (session?.user) {
         setUser({
           id: session.user.id,
           email: session.user.email,
           name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
           role: session.user.user_metadata?.role || 'user',
+          user_metadata: session.user.user_metadata,
         });
+        checkIsAdmin(session.user);
       }
       setIsLoading(false);
     };
@@ -59,9 +84,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: session.user.email,
           name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
           role: session.user.user_metadata?.role || 'user',
+          user_metadata: session.user.user_metadata,
         });
+        checkIsAdmin(session.user);
       } else {
         setUser(null);
+        setIsAdmin(false);
       }
       setIsLoading(false);
     });
@@ -101,6 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
+    setIsAdmin(false);
     router.push("/login");
   };
 
@@ -111,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session, 
         isLoggedIn: !!user, 
         isLoading, 
+        isAdmin, // Exportando para uso na Navbar e rotas protegidas
         login, 
         register, 
         logout 
